@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: acai_gest_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: acaigest
+      POSTGRES_DB: acai_gest
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgres/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: acai_gest_backend
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      NODE_ENV: development
+      FRONTEND_URL: gttp://localhost:3000
+      JWT_SECRET: acai_gest_super_secret_key_2026
+      JWT_EXPIRES_IN: 7d
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: acaigest
+      DB_NAME: acai_gest
+      DB_MAX_CONNECTIONS: 20
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+      - ./server.js:/app/server.js
+    command: npm run dev
+
+volumes:
+  postgres_data:
+    driver: local

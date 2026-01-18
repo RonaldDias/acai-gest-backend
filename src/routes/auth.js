@@ -48,7 +48,6 @@ const cadastroValidation = [
     .withMessage("Forma de pagamento inválida"),
 ];
 
-
 router.post("/", loginValidation, async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -113,7 +112,6 @@ router.post("/", loginValidation, async (req, res) => {
   }
 });
 
-// POST /api/auth/register - Cadastro completo
 router.post("/cadastro", cadastroValidation, async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -201,7 +199,6 @@ router.post("/cadastro", cadastroValidation, async (req, res) => {
   }
 });
 
-// GET /api/auth/validate-email - Validar se email já existe
 router.get("/validate-email/:email", async (req, res) => {
   try {
     const { email } = req.params;
@@ -226,7 +223,6 @@ router.get("/validate-email/:email", async (req, res) => {
   }
 });
 
-// POST /api/auth/forgot-password
 router.post(
   "/forgot-password",
   [body("email").isEmail().withMessage("Email inválido")],

@@ -1,0 +1,6 @@
+{
+  "databaseUrl": "postgres://postgres:acaigest@localhost:5432/acai_gest",
+  "migrationsTable": "pgmigrations",
+  "dir": "migrations",
+  "direction": "up"
+}

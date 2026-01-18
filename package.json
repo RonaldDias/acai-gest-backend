@@ -11,9 +11,12 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "migrate": "node-pg-migrate",
+    "migrate:up": "DATABASE_URL=postgresql://postgres:acaigest@localhost:5432/acai_gest node-pg-migrate up",
+    "migrate:down": "node-pg-migrate down",
+    "migrate:create": "node-pg-migrate create"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
@@ -22,6 +25,7 @@
     "express": "4.19.2",
     "express-validator": "^7.2.1",
     "helmet": "^8.1.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3"
   }
 }
