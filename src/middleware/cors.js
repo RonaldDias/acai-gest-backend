@@ -1,12 +1,14 @@
 export function corsMiddleware(req, res, next) {
-  res.header(
-    "Access-Control-Allow-Origin",
-    process.env.FRONTEND_URL || "http://localhost:300"
-  );
+  const allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:3000"];
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header(
-    "Acces-Control-ALlow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
   );
 
   if (req.method === "OPTIONS") {

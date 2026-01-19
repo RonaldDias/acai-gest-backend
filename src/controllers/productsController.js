@@ -14,7 +14,7 @@ export async function getAll(req, res) {
 
     const pontoExists = await pool.query(
       "SELECT id FROM pontos WHERE id = $1",
-      [ponto_id]
+      [ponto_id],
     );
 
     if (pontoExists.rowCount === 0) {
@@ -29,15 +29,14 @@ export async function getAll(req, res) {
         id,
         nome,
         unidade,
-        estoque_atual,
+        quantidade_estoque,
         estoque_minimo,
-        preco_venda,
-        created_at,
-        updated_at
+        preco:: numeric AS preco_venda,
+        data_cadastro
       FROM produtos
       WHERE ponto_id = $1
       ORDER BY nome ASC`,
-      [ponto_id]
+      [ponto_id],
     );
 
     res.json({
@@ -87,7 +86,7 @@ export async function entrada(req, res) {
 
     const produtoExists = await client.query(
       "SELECT id FROM produtos WHERE id = $1",
-      [produto_id]
+      [produto_id],
     );
 
     if (produtoExists.rowCount === 0) {
@@ -104,16 +103,16 @@ export async function entrada(req, res) {
           (produto_id, tipo, quantidade, custo, observacao)
         VALUES ($1, $2, $3, $4, $5)
         RETURNING *`,
-      [produto_id, "entrada", quantidade, custo || null, observacao || null]
+      [produto_id, "entrada", quantidade, custo || null, observacao || null],
     );
 
     const produtoAtualizado = await client.query(
       `UPDATE produtos
-      SET estoque_atual = estoque_atual + $1,
+      SET quantidade_estoque = quantidade_estoque + $1,
         updated_at = CURRENT_TIMESTAMP
       WHERE id = $2
       RETURNING *`,
-      [quantidade, produto_id]
+      [quantidade, produto_id],
     );
 
     if (produtoAtualizado.rowCount === 0) {

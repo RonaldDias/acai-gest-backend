@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import express from "express";
 import { testConnection } from "./src/config/database.js";
-import corsMiddleware from "./src/middleware/cors.js";
-import loggerMiddleware from "./src/middleware/logger.js";
+import { corsMiddleware } from "./src/middleware/cors.js";
+import { loggerMiddleware } from "./src/middleware/logger.js";
 import authRoutes from "./src/routes/auth.js";
 import productsRoutes from "./src/routes/products.js";
 import salesRoutes from "./src/routes/sales.js";

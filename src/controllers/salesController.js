@@ -34,10 +34,10 @@ export async function create(req, res) {
     }
 
     const vendaResult = await client.query(
-      `INSERT INTO vendas (ponto_id, vendedor_id, total, forma_pagamento)
+      `INSERT INTO vendas (ponto_id, vendedor_id, valor_total, forma_pagamento)
         VALUES ($1, $2, $3, $4)
         RETURNING *`,
-      [ponto_id, vendedor_id, total, forma_pagamento]
+      [ponto_id, vendedor_id, total, forma_pagamento],
     );
 
     const venda = vendaResult.rows[0];
@@ -55,7 +55,7 @@ export async function create(req, res) {
           item.quantidade,
           item.preco_unitario,
           item.quantidade * item.preco_unitario,
-        ]
+        ],
       );
 
       itensVenda.push(itemResult.rows[0]);
@@ -63,21 +63,20 @@ export async function create(req, res) {
       await client.query(
         `INSERT INTO movimentacoes_estoque (produto_id, tipo, quantidade, observacao)
         VALUES ($1, $2, $3, $4)`,
-        [item.produto_id, "saída", item.quantidade, `Venda #${venda.id}`]
+        [item.produto_id, "saida", item.quantidade, `Venda #${venda.id}`],
       );
 
       const estoqueResult = await client.query(
         `UPDATE produtos
-        SET estoque_atual = estoque_atual - $1,
-            updated_at = CURRENT_TIMESTAMP
+        SET quantidade_estoque = quantidade_estoque - $1
         WHERE id = $2 AND ponto_id = $3
-        RETURNING estoque_atual`,
-        [item.quantidade, item.produto_id, ponto_id]
+        RETURNING quantidade_estoque`,
+        [item.quantidade, item.produto_id, ponto_id],
       );
 
       if (estoqueResult.rowCount === 0) {
         throw new Error(
-          `Produto ${item.produto_id} não encontrado ou estoque insuficiente`
+          `Produto ${item.produto_id} não encontrado ou estoque insuficiente`,
         );
       }
     }
@@ -118,9 +117,9 @@ export async function today(req, res) {
     const result = await pool.query(
       `SELECT
         v.id,
-        v.total,
+        v.valor_total,
         v.forma_pagamento,
-        v.created_at,
+        v.data_venda,
         u.nome as vendedor_nome,
         json_agg(
           json_build_object(
@@ -134,12 +133,12 @@ export async function today(req, res) {
        FROM vendas v
        INNER JOIN usuarios u ON v.vendedor_id = u.id
        INNER JOIN itens_venda iv ON v.id = iv.venda_id
-       INNSER JOIN produtos p ON iv.produto_id = p.id
+       INNER JOIN produtos p ON iv.produto_id = p.id
        WHERE v.ponto_id = $1
-         AND DATE(v.created_at) = CURRENT_DATE
+         AND DATE(v.data_venda) = CURRENT_DATE
        GROUP BY v.id, u.nome
-       ORDER BY v.created_at DESC`,
-      [pontoId]
+       ORDER BY v.data_venda DESC`,
+      [pontoId],
     );
 
     res.json({
@@ -169,11 +168,11 @@ export async function summaryToday(req, res) {
     const result = await pool.query(
       `SELECT
           COUNT(*) as total_vendas,
-          COALESCE(SUM(total), 0) as total_faturado
+          COALESCE(SUM(valor_total), 0) as total_faturado
         FROM vendas
         WHERE ponto_id = $1
-          AND DATE(created_at) = CURRENT_DATE`,
-      [pontoId]
+          AND DATE(data_venda) = CURRENT_DATE`,
+      [pontoId],
     );
 
     res.json({

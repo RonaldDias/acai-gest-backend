@@ -22,7 +22,7 @@ const cadastroValidation = [
   body("senha")
     .matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/)
     .withMessage(
-      "Senha deve ter pelo menos 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial"
+      "Senha deve ter pelo menos 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial",
     ),
   body("confirmaSenha").custom((value, { req }) => {
     if (value !== req.body.senha) {
@@ -48,7 +48,7 @@ const cadastroValidation = [
     .withMessage("Forma de pagamento inválida"),
 ];
 
-router.post("/", loginValidation, async (req, res) => {
+router.post("/login", loginValidation, async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -253,7 +253,7 @@ router.post(
         message: "Erro interno do servidor",
       });
     }
-  }
+  },
 );
 
 export default router;
