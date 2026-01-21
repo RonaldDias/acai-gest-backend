@@ -1,7 +1,9 @@
 import express from "express";
 import { body, validationResult } from "express-validator";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import {
+  cadastrarUsuario,
+  loginUsuario,
+} from "../controllers/authController.js";
 
 const router = express.Router();
 
@@ -48,156 +50,9 @@ const cadastroValidation = [
     .withMessage("Forma de pagamento inválida"),
 ];
 
-router.post("/login", loginValidation, async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Dados inválidos",
-        errors: errors.array(),
-      });
-    }
+router.post("/login", loginValidation, loginUsuario);
 
-    const { email, senha } = req.body;
-
-    // TODO: Buscar usuário no banco de dados
-    // const usuario = await Usuario.findOne({ email });
-    // if (!usuario) {
-    //   return res.status(401).json({
-    //     success: false,
-    //     message: 'Email ou senha incorretos'
-    //   });
-    // }
-
-    // TODO: Verificar senha
-    // const senhaValida = await bcrypt.compare(senha, usuario.senha);
-    // if (!senhaValida) {
-    //   return res.status(401).json({
-    //     success: false,
-    //     message: 'Email ou senha incorretos'
-    //   });
-    // }
-
-    // TODO: Gerar JWT
-    // const token = jwt.sign(
-    //   { userId: usuario._id, email: usuario.email },
-    //   process.env.JWT_SECRET,
-    //   { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-    // );
-
-    if (email === "admin@acaigest.com" && senha === "123456") {
-      res.json({
-        success: true,
-        message: "Login realizado com sucesso",
-        user: {
-          id: 1,
-          nome: "Administrador",
-          email: email,
-        },
-        token: "mock_jwt_token_here",
-      });
-    } else {
-      res.status(401).json({
-        success: false,
-        message: "Email ou senha incorretos",
-      });
-    }
-  } catch (error) {
-    console.error("Erro no login:", error);
-    res.status(500).json({
-      success: false,
-      message: "Erro interno do servidor",
-    });
-  }
-});
-
-router.post("/cadastro", cadastroValidation, async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Dados inválidos",
-        errors: errors.array(),
-      });
-    }
-
-    const {
-      nome,
-      cpf,
-      telefone,
-      email,
-      senha,
-      nomeEmpresa,
-      cnpj,
-      endereco,
-      plano,
-      formaPagamento,
-    } = req.body;
-
-    // TODO: Verificar se email já existe
-    // const usuarioExistente = await Usuario.findOne({ email });
-    // if (usuarioExistente) {
-    //   return res.status(409).json({
-    //     success: false,
-    //     message: 'Email já cadastrado'
-    //   });
-    // }
-
-    // TODO: Hash da senha
-    // const senhaHash = await bcrypt.hash(senha, 12);
-
-    // TODO: Salvar no banco
-    // const novoUsuario = new Usuario({
-    //   nome,
-    //   cpf: cpf.replace(/\D/g, ''), // Remove formatação
-    //   telefone,
-    //   email,
-    //   senha: senhaHash,
-    //   empresa: {
-    //     nome: nomeEmpresa,
-    //     cnpj,
-    //     endereco
-    //   },
-    //   plano,
-    //   formaPagamento
-    // });
-    // await novoUsuario.save();
-
-    // TODO: Gerar JWT
-    // const token = jwt.sign(
-    //   { userId: novoUsuario._id, email: novoUsuario.email },
-    //   process.env.JWT_SECRET,
-    //   { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-    // );
-
-    res.status(201).json({
-      success: true,
-      message: "Cadastro realizado com sucesso",
-      user: {
-        id: Date.now(),
-        nome,
-        email,
-        cpf,
-        telefone,
-        empresa: {
-          nome: nomeEmpresa,
-          cnpj,
-        },
-        plano,
-        createdAt: new Date(),
-      },
-      token: "mock_jwt_token_here",
-    });
-  } catch (error) {
-    console.error("Erro no cadastro:", error);
-    res.status(500).json({
-      success: false,
-      message: "Erro interno do servidor",
-    });
-  }
-});
+router.post("/cadastro", cadastroValidation, cadastrarUsuario);
 
 router.get("/validate-email/:email", async (req, res) => {
   try {
