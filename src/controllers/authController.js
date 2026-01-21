@@ -1,6 +1,5 @@
-import jwt from "jsonwebtoken";
 import pool from "../config/database.js";
-import { hashPassword, comparePassword } from "../utils/auth.js";
+import { hashPassword, comparePassword, generateToken } from "../utils/auth.js";
 
 export const cadastrarUsuario = async (req, res) => {
   const client = await pool.connect();
@@ -86,17 +85,13 @@ export const cadastrarUsuario = async (req, res) => {
 
     await client.query("COMMIT");
 
-    const token = jwt.sign(
-      {
-        userId: usuario.id,
-        email: usuario.email,
-        role: usuario.role,
-        empresaId: empresaId,
-        pontoId: pontoId,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" },
-    );
+    const token = generateToken({
+      userId: usuario.id,
+      email: usuario.email,
+      role: usuario.role,
+      empresaId: empresaId,
+      pontoId: pontoId,
+    });
 
     res.status(201).json({
       success: true,
@@ -170,17 +165,13 @@ export const loginUsuario = async (req, res) => {
       });
     }
 
-    const token = jwt.sign(
-      {
-        userId: usuario.id,
-        email: usuario.email,
-        role: usuario.role,
-        empresaId: usuario.empresa_id,
-        pontoId: usuario.ponto_id,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" },
-    );
+    const token = generateToken({
+      userId: usuario.id,
+      email: usuario.email,
+      role: usuario.role,
+      empresaId: usuario.empresa_id,
+      pontoId: usuario.ponto_id,
+    });
 
     res.json({
       success: true,
