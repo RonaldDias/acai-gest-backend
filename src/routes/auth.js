@@ -4,6 +4,7 @@ import {
   cadastrarUsuario,
   loginUsuario,
 } from "../controllers/authController.js";
+import { refreshAccessToken } from "../controllers/refreshController.js";
 
 const router = express.Router();
 
@@ -53,6 +54,8 @@ const cadastroValidation = [
 router.post("/login", loginValidation, loginUsuario);
 
 router.post("/cadastro", cadastroValidation, cadastrarUsuario);
+
+router.post("/refresh", refreshAccessToken);
 
 router.get("/validate-email/:email", async (req, res) => {
   try {

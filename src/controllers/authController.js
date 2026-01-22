@@ -1,5 +1,11 @@
 import pool from "../config/database.js";
-import { hashPassword, comparePassword, generateToken } from "../utils/auth.js";
+import {
+  hashPassword,
+  comparePassword,
+  generateToken,
+  generateRefreshToken,
+  getRefreshTokenExpiry,
+} from "../utils/auth.js";
 
 export const cadastrarUsuario = async (req, res) => {
   const client = await pool.connect();
@@ -93,6 +99,15 @@ export const cadastrarUsuario = async (req, res) => {
       pontoId: pontoId,
     });
 
+    const refreshToken = generateRefreshToken();
+    const refreshTokenExpiry = getRefreshTokenExpiry();
+
+    await client.query(
+      `INSERT INTO refresh_tokens (user_id, token, expires_at)
+      VALUES ($1, $2, $3)`,
+      [usuario.id, refreshToken, refreshTokenExpiry],
+    );
+
     res.status(201).json({
       success: true,
       message: "Cadastro realizado com sucesso",
@@ -107,6 +122,7 @@ export const cadastrarUsuario = async (req, res) => {
         createdAt: usuario.data_cadastro,
       },
       token,
+      refreshToken,
     });
   } catch (error) {
     await client.query("ROLLBACK");
@@ -173,6 +189,15 @@ export const loginUsuario = async (req, res) => {
       pontoId: usuario.ponto_id,
     });
 
+    const refreshToken = generateRefreshToken();
+    const refreshTokenExpiry = getRefreshTokenExpiry();
+
+    await pool.query(
+      `INSERT INTO refresh_tokens (user_id, token, expires_at)
+      VALUES ($1, $2, $3)`,
+      [usuario.id, refreshToken, refreshTokenExpiry],
+    );
+
     res.json({
       success: true,
       message: "Login realizado com sucesso",
@@ -189,6 +214,7 @@ export const loginUsuario = async (req, res) => {
         },
       },
       token,
+      refreshToken,
     });
   } catch (error) {
     console.error("Erro no login:", error);

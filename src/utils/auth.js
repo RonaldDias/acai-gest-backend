@@ -1,5 +1,6 @@
 import bcrypt, { hash } from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 export const hashPassword = async (senha) => {
   const saltRounds = 12;
@@ -22,4 +23,14 @@ export const verifyToken = (token) => {
   } catch (error) {
     throw error;
   }
+};
+
+export const generateRefreshToken = () => {
+  return crypto.randomBytes(64).toString("hex");
+};
+
+export const getRefreshTokenExpiry = () => {
+  const expiryDate = new Date();
+  expiryDate.setDate(expiryDate.getDate() + 30);
+  return expiryDate;
 };

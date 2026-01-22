@@ -42,6 +42,8 @@ services:
     volumes:
       - ./src:/app/src
       - ./server.js:/app/server.js
+      - ./migrations:/app/migrations
+      - ./package.json:/app/package.json
     command: npm run dev
 
 volumes:
