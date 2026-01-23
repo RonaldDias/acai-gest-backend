@@ -3,6 +3,8 @@ import { body, validationResult } from "express-validator";
 import {
   cadastrarUsuario,
   loginUsuario,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/authController.js";
 import { refreshAccessToken } from "../controllers/refreshController.js";
 
@@ -82,36 +84,23 @@ router.get("/validate-email/:email", async (req, res) => {
 });
 
 router.post(
-  "/forgot-password",
+  "/esqueci-senha",
   [body("email").isEmail().withMessage("Email inválido")],
-  async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Email inválido",
-          errors: errors.array(),
-        });
-      }
+  forgotPassword,
+);
 
-      const { email } = req.body;
-
-      // TODO: Implementar recuperação de senha
-
-      res.json({
-        success: true,
-        message:
-          "Se o email existir, você receberá instruções para redefinir sua senha",
-      });
-    } catch (error) {
-      console.error("Erro na recuperação:", error);
-      res.status(500).json({
-        success: false,
-        message: "Erro interno do servidor",
-      });
-    }
-  },
+router.post(
+  "/redefinir-senha",
+  [
+    body("email").isEmail().withMessage("Email inválido"),
+    body("token").isLength({ min: 6, max: 6 }).withMessage("Token inválido"),
+    body("novaSenha")
+      .matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/)
+      .withMessage(
+        "Senha deve ter pelo menos 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial",
+      ),
+  ],
+  resetPassword,
 );
 
 export default router;

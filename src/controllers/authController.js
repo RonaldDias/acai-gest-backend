@@ -5,6 +5,8 @@ import {
   generateToken,
   generateRefreshToken,
   getRefreshTokenExpiry,
+  generatePasswordResetToken,
+  getPasswordResetTokenExpiry,
 } from "../utils/auth.js";
 
 export const cadastrarUsuario = async (req, res) => {
@@ -222,5 +224,115 @@ export const loginUsuario = async (req, res) => {
       success: false,
       message: "Erro interno do servidor",
     });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const result = await pool.query(
+      "SELECT id, nome, email FROM usuarios WHERE email = $1 AND ativo = true",
+      [email],
+    );
+
+    if (result.rows.length === 0) {
+      return res.json({
+        success: true,
+        message:
+          "Se o email existir, você receberá instruções para redefinir sua senha",
+      });
+    }
+
+    const usuario = result.rows[0];
+    const resetToken = generatePasswordResetToken();
+    const resetTokenExpiry = getPasswordResetTokenExpiry();
+
+    await pool.query(
+      "UPDATE usuarios SET reset_token = $1, reset_token_expires = $2 WHERE id = $3",
+      [resetToken, resetTokenExpiry, usuario.id],
+    );
+
+    console.log(`Token de reset para ${email}: ${resetToken}`);
+
+    res.json({
+      success: true,
+      message:
+        "Se o email existir, você receberá instruções para redefinir sua senha",
+    });
+  } catch (error) {
+    console.error("Erro ao solicitar reset de senha:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro interno do servidor",
+    });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    const { email, token, novaSenha } = req.body;
+
+    await client.query("BEGIN");
+
+    const result = await client.query(
+      "SELECT id, reset_token, reset_token_expires FROM usuarios WHERE email = $1 AND ativo = true",
+      [email],
+    );
+
+    if (result.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        success: false,
+        message: "Token inválido ou expirado",
+      });
+    }
+
+    const usuario = result.rows[0];
+
+    if (!usuario.reset_token || usuario.reset_token !== token) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        success: false,
+        message: "Token inválido ou expirado",
+      });
+    }
+
+    if (new Date() > new Date(usuario.reset_token_expires)) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        success: false,
+        message: "Token inválido ou expirado",
+      });
+    }
+
+    const senhaHash = await hashPassword(novaSenha);
+
+    await client.query(
+      "UPDATE usuarios SET senha = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2",
+      [senhaHash, usuario.id],
+    );
+
+    await client.query("DELETE FROM refresh_tokens WHERE user_id = $1", [
+      usuario.id,
+    ]);
+
+    await client.query("COMMIT");
+
+    res.json({
+      success: true,
+      message: "Senha redefinida com sucesso",
+    });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Erro ao redefinir senha:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro interno do servidor",
+    });
+  } finally {
+    client.release();
   }
 };

@@ -34,3 +34,13 @@ export const getRefreshTokenExpiry = () => {
   expiryDate.setDate(expiryDate.getDate() + 30);
   return expiryDate;
 };
+
+export const generatePasswordResetToken = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+export const getPasswordResetTokenExpiry = () => {
+  const expiryDate = new Date();
+  expiryDate.setMinutes(expiryDate.getMinutes() + 15);
+  return expiryDate;
+};
