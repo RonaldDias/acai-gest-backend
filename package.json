@@ -17,7 +17,7 @@
     "migrate:up": "DATABASE_URL=postgresql://postgres:acaigest@localhost:5432/acai_gest node-pg-migrate up",
     "migrate:down": "node-pg-migrate down",
     "migrate:create": "node-pg-migrate create",
-    "migrate:docker": "DATABASE_URL=postgresql://postgres:acaigest@postgres:5432/acai_gest node-pg-migrate up"
+    "migrate:docker": "DATABASE_URL=postgresql://postgres:acaigest@postgres:5432/acai_gest npx node-pg-migrate up"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
@@ -27,6 +27,7 @@
     "express-validator": "^7.2.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^7.0.12",
     "pg": "^8.16.3"
   }
 }

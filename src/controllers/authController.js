@@ -8,6 +8,11 @@ import {
   generatePasswordResetToken,
   getPasswordResetTokenExpiry,
 } from "../utils/auth.js";
+import {
+  sendWelcomeEmail,
+  sendPasswordResetEmail,
+  sendPasswordChangedEmail,
+} from "../services/emailService.js";
 
 export const cadastrarUsuario = async (req, res) => {
   const client = await pool.connect();
@@ -23,6 +28,7 @@ export const cadastrarUsuario = async (req, res) => {
       cnpj,
       endereco,
       plano,
+      quantidadePontos,
       formaPagamento,
     } = req.body;
 
@@ -55,32 +61,46 @@ export const cadastrarUsuario = async (req, res) => {
       });
     }
 
+    if (quantidadePontos >= 2 && plano.toLowerCase() === "basico") {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        success: false,
+        message: "Plano BASIC permite apenas 1 ponto de venda",
+      });
+    }
+
     const senhaHash = await hashPassword(senha);
 
     const resultEmpresa = await client.query(
-      `INSERT INTO empresas (nome, cnpj, endereco, plano, quantidade_pontos, forma_pagamento, ativo)
-        VALUES ($1, $2, $3, $4, $5, $6, true)
+      `INSERT INTO empresas (nome, cnpj, telefone, email, endereco, plano, quantidade_pontos, forma_pagamento, ativo)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true)
         RETURNING id`,
       [
         nomeEmpresa,
         cnpj,
+        telefone,
+        email,
         endereco,
-        plano.toUpperCase() === "BASIC" ? "basico" : "top",
-        plano.toUpperCase() === "BASIC" ? 1 : 2,
+        plano.toLowerCase(),
+        quantidadePontos,
         formaPagamento,
       ],
     );
 
     const empresaId = resultEmpresa.rows[0].id;
 
-    const resultPonto = await client.query(
-      `INSERT INTO pontos (empresa_id, nome, endereco, ativo)
+    const pontos = [];
+    for (let i = 0; i < quantidadePontos; i++) {
+      const resultPonto = await client.query(
+        `INSERT INTO pontos (empresa_id, nome, endereco, ativo)
         VALUES ($1, $2, $3, true)
         RETURNING id`,
-      [empresaId, `${nomeEmpresa} - Principal`, endereco],
-    );
+        [empresaId, nomeEmpresa, endereco],
+      );
+      pontos.push(resultPonto.rows[0].id);
+    }
 
-    const pontoId = resultPonto.rows[0].id;
+    const pontoId = pontos[0];
 
     const resultUsuario = await client.query(
       `INSERT INTO usuarios (empresa_id, ponto_id, nome, cpf, email, senha, role, aceitou_termos, ativo)
@@ -92,6 +112,12 @@ export const cadastrarUsuario = async (req, res) => {
     const usuario = resultUsuario.rows[0];
 
     await client.query("COMMIT");
+
+    try {
+      await sendWelcomeEmail(usuario.nome, usuario.email);
+    } catch (emailError) {
+      console.error("Erro ao enviar email de boas-vindas:", emailError);
+    }
 
     const token = generateToken({
       userId: usuario.id,
@@ -253,7 +279,11 @@ export const forgotPassword = async (req, res) => {
       [resetToken, resetTokenExpiry, usuario.id],
     );
 
-    console.log(`Token de reset para ${email}: ${resetToken}`);
+    try {
+      await sendPasswordResetEmail(usuario.nome, usuario.email, resetToken);
+    } catch (emailError) {
+      console.error("Erro ao enviar email de recuperação:", emailError);
+    }
 
     res.json({
       success: true,
@@ -278,7 +308,7 @@ export const resetPassword = async (req, res) => {
     await client.query("BEGIN");
 
     const result = await client.query(
-      "SELECT id, reset_token, reset_token_expires FROM usuarios WHERE email = $1 AND ativo = true",
+      "SELECT id, nome, reset_token, reset_token_expires FROM usuarios WHERE email = $1 AND ativo = true",
       [email],
     );
 
@@ -319,7 +349,15 @@ export const resetPassword = async (req, res) => {
       usuario.id,
     ]);
 
+    const nomeUsuario = result.rows[0].nome || "Usuário";
+
     await client.query("COMMIT");
+
+    try {
+      await sendPasswordChangedEmail(nomeUsuario, email);
+    } catch (emailError) {
+      console.error("Erro ao enviar email de confirmação:", emailError);
+    }
 
     res.json({
       success: true,
