@@ -6,6 +6,7 @@ import { loggerMiddleware } from "./src/middleware/logger.js";
 import authRoutes from "./src/routes/auth.js";
 import productsRoutes from "./src/routes/products.js";
 import salesRoutes from "./src/routes/sales.js";
+import vendedoresRoutes from "./src/routes/vendedores.js";
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/sales", salesRoutes);
+app.use("/api/vendedores", vendedoresRoutes);
 
 app.use("*", (req, res) => {
   res.status(404).json({

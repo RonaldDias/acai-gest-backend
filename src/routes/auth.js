@@ -11,7 +11,7 @@ import { refreshAccessToken } from "../controllers/refreshController.js";
 const router = express.Router();
 
 const loginValidation = [
-  body("email").isEmail().withMessage("Email inválido"),
+  body("login").isEmail().withMessage("Email ou CPF é obrigatório"),
   body("senha").notEmpty().withMessage("Senha é obrigatória"),
 ];
 

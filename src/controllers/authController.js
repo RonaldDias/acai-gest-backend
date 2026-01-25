@@ -166,21 +166,23 @@ export const cadastrarUsuario = async (req, res) => {
 
 export const loginUsuario = async (req, res) => {
   try {
-    const { email, senha } = req.body;
+    const { login, senha } = req.body;
+
+    const isEmail = login.includes("@");
 
     const result = await pool.query(
-      `SELECT u.id, u.nome, u.senha, u.role, u.empresa_id, u.ponto_id, u.ativo,
+      `SELECT u.id, u.nome, u.senha, u.role, u.empresa_id, u.ponto_id, u.ativo, u.email,
                 e.nome as empresa_nome, e.plano, e.ativo as empresa_ativa
         FROM usuarios u
         INNER JOIN empresas e ON u.empresa_id = e.id
-        WHERE u.email = $1`,
-      [email],
+        WHERE ${isEmail ? "u.email" : "u.cpf"} = $1`,
+      [login],
     );
 
     if (result.rows.length === 0) {
       return res.status(401).json({
         success: false,
-        message: "Email ou senha incorretos",
+        message: "Credenciais incorretas",
       });
     }
 

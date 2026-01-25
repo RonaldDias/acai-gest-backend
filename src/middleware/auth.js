@@ -65,7 +65,7 @@ export const authorize = (...allowedRoles) => {
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: "Sem permissão para acessar ester recurso",
+        message: "Sem permissão para acessar este recurso",
       });
     }
 

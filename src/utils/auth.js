@@ -44,3 +44,7 @@ export const getPasswordResetTokenExpiry = () => {
   expiryDate.setMinutes(expiryDate.getMinutes() + 15);
   return expiryDate;
 };
+
+export const generateVendedorPassword = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
