@@ -1,5 +1,6 @@
 import pool from "../config/database.js";
 import { hashPassword, generateVendedorPassword } from "../utils/auth.js";
+import { cpfExists } from "../utils/validators.js";
 
 export const createVendedor = async (req, res) => {
   const client = await pool.connect();
@@ -24,12 +25,8 @@ export const createVendedor = async (req, res) => {
     }
 
     const cpfLimpo = cpf.replace(/\D/g, "");
-    const cpfExistente = await client.query(
-      "SELECT id FROM usuarios WHERE cpf = $1",
-      [cpfLimpo],
-    );
 
-    if (cpfExistente.rows.length > 0) {
+    if (await cpfExists(cpf)) {
       await client.query("ROLLBACK");
       return res.status(409).json({
         success: false,

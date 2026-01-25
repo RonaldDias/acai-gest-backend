@@ -13,6 +13,7 @@ import {
   sendPasswordResetEmail,
   sendPasswordChangedEmail,
 } from "../services/emailService.js";
+import { cpfExists, emailExists } from "../utils/validators.js";
 
 export const cadastrarUsuario = async (req, res) => {
   const client = await pool.connect();
@@ -34,12 +35,7 @@ export const cadastrarUsuario = async (req, res) => {
 
     await client.query("BEGIN");
 
-    const emailExistente = await client.query(
-      "SELECT id FROM usuarios WHERE email = $1",
-      [email],
-    );
-
-    if (emailExistente.rows.length > 0) {
+    if (await emailExists(email)) {
       await client.query("ROLLBACK");
       return res.status(409).json({
         success: false,
@@ -47,13 +43,7 @@ export const cadastrarUsuario = async (req, res) => {
       });
     }
 
-    const cpfLimpo = cpf.replace(/\D/g, "");
-    const cpfExistente = await client.query(
-      "SELECT id FROM usuarios WHERE cpf = $1",
-      [cpfLimpo],
-    );
-
-    if (cpfExistente.rows.length > 0) {
+    if (await cpfExists(cpf)) {
       await client.query("ROLLBACK");
       return res.status(409).json({
         success: false,
