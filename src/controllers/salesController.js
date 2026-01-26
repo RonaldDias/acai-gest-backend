@@ -28,6 +28,34 @@ export async function create(req, res) {
 
     await client.query("BEGIN");
 
+    for (const item of itens) {
+      const estoqueCheck = await client.query(
+        `SELECT nome, quantidade_estoque
+        FROM produtos
+        WHERE id = $1 AND ponto_id = $2`,
+        [item.produto_id, ponto_id],
+      );
+
+      if (estoqueCheck.rowCount === 0) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({
+          success: false,
+          message: `Produto ${item.produto_id} não encontrado`,
+        });
+      }
+
+      const produto = estoqueCheck.rows[0];
+      const estoqueAtual = parseFloat(produto.quantidade_estoque);
+
+      if (estoqueAtual < item.quantidade) {
+        await client.query("ROLLBACK");
+        return res.status(400).json({
+          success: false,
+          message: `Estoque insuficiente para produto ${produto.nome}`,
+        });
+      }
+    }
+
     let total = 0;
     for (const item of itens) {
       total += item.quantidade * item.preco_unitario;
@@ -66,19 +94,12 @@ export async function create(req, res) {
         [item.produto_id, "saida", item.quantidade, `Venda #${venda.id}`],
       );
 
-      const estoqueResult = await client.query(
+      await client.query(
         `UPDATE produtos
         SET quantidade_estoque = quantidade_estoque - $1
-        WHERE id = $2 AND ponto_id = $3
-        RETURNING quantidade_estoque`,
+        WHERE id = $2 AND ponto_id = $3`,
         [item.quantidade, item.produto_id, ponto_id],
       );
-
-      if (estoqueResult.rowCount === 0) {
-        throw new Error(
-          `Produto ${item.produto_id} não encontrado ou estoque insuficiente`,
-        );
-      }
     }
 
     await client.query("COMMIT");
