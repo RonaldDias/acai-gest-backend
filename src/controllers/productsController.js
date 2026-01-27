@@ -4,6 +4,7 @@ export async function getAll(req, res) {
   try {
     const empresaId = req.user.empresaId;
     const pontoId = parseInt(req.query.ponto_id);
+    const showAlerts = req.query.alert === "true";
 
     if (!pontoId || isNaN(pontoId)) {
       return res.status(400).json({
@@ -24,20 +25,30 @@ export async function getAll(req, res) {
       });
     }
 
+    const alertFilter = showAlerts
+      ? "AND quantidade_estoque <= estoque_minimo"
+      : "";
+
+    const faltaField = showAlerts
+      ? "(estoque_minimo - quantidade_estoque):: numeric AS falta,"
+      : "";
+
     const result = await pool.query(
       `SELECT
         id,
         nome,
         tipo,
         unidade,
-        quantidade_estoque,
-        estoque_minimo,
+        quantidade_estoque::numeric AS quantidade_estoque,
+        estoque_minimo::numeric AS estoque_minimo,
+        ${faltaField}
         preco:: numeric AS preco,
         ativo,
         data_cadastro
       FROM produtos
       WHERE ponto_id = $1 AND ativo = true
-      ORDER BY nome ASC`,
+      ${alertFilter}
+      ORDER BY ${showAlerts ? "falta DESC," : ""} nome ASC`,
       [pontoId],
     );
 
