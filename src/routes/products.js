@@ -27,6 +27,12 @@ router.delete(
   productsController.deleteProduct,
 );
 
+router.get(
+  "/:id/movimentacoes",
+  authenticate,
+  productsController.getMovimentacoes,
+);
+
 router.post(
   "/entrada",
   authenticate,

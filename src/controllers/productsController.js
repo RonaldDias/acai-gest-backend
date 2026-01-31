@@ -289,3 +289,69 @@ export async function deleteProduct(req, res) {
     });
   }
 }
+
+export async function getMovimentacoes(req, res) {
+  try {
+    const { id } = req.params;
+    const empresaId = req.user.empresaId;
+    const dataInicio = req.query.data_inicio;
+    const dataFim = req.query.data_fim;
+
+    const produtoExists = await pool.query(
+      `SELECT p.id
+      FROM produtos p
+      INNER JOIN pontos pt ON p.ponto_id = pt.id
+      WHERE p.id = $1 AND pt.empresa_id = $2`,
+      [id, empresaId],
+    );
+
+    if (produtoExists.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Produto não encontrado",
+      });
+    }
+
+    let dateFilter = "";
+    const queryParams = [id];
+
+    if (dataInicio && dataFim) {
+      dateFilter = "AND data BETWEEN $2 AND $3";
+      queryParams.push(dataInicio, dataFim);
+    } else if (dataInicio) {
+      dateFilter = "AND data >= $2";
+      queryParams.push(dataInicio);
+    } else if (dataFim) {
+      dateFilter = "AND data <= $2";
+      queryParams.push(dataFim);
+    }
+
+    const result = await pool.query(
+      `SELECT
+        id,
+        tipo,
+        quantidade::numeric AS quantidade,
+        custo:: numeric AS custo,
+        observacao,
+        data
+      FROM movimentacoes_estoque
+      WHERE produto_id = $1
+      ${dateFilter}
+      ORDER BY data DESC`,
+      queryParams,
+    );
+
+    res.json({
+      success: true,
+      data: result.rows,
+      total: result.rowCount,
+    });
+  } catch (error) {
+    console.error("Erro ao buscar movimentações:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro ao buscar movimentações",
+      error: error.message,
+    });
+  }
+}
