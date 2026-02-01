@@ -211,3 +211,83 @@ export async function summaryToday(req, res) {
     });
   }
 }
+
+export async function cancel(req, res) {
+  const client = await pool.connect();
+
+  try {
+    const { id } = req.params;
+    const empresaId = req.user.empresaId;
+
+    const venda = await client.query(
+      `SELECT v.* FROM vendas v
+      INNER JOIN pontos pt ON v.ponto_id = pt.id
+      WHERE v.id = $1 AND pt.empresa_id = $2`,
+      [id, empresaId],
+    );
+
+    if (venda.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Venda não encontrada",
+      });
+    }
+
+    if (venda.rows[0].status === "cancelada") {
+      return res.status(400).json({
+        success: false,
+        message: "Venda já foi cancelada",
+      });
+    }
+
+    const itens = await client.query(
+      "SELECT * FROM itens_venda WHERE venda_id = $1",
+      [id],
+    );
+
+    await client.query("BEGIN");
+
+    for (const item of itens.rows) {
+      await client.query(
+        `UPDATE produtos
+        SET quantidade_estoque = quantidade_estoque + $1
+        WHERE id = $2`,
+        [item.quantidade, item.produto_id],
+      );
+
+      await client.query(
+        `INSERT INTO movimentacoes_estoque (produto_id, tipo, quantidade, observacao)
+        VALUES ($1, 'entrada', $2, $3)`,
+        [item.produto_id, item.quantidade, `Estorno Venda #${id}`],
+      );
+    }
+
+    await client.query(
+      `INSERT INTO fluxo_caixa (ponto_id, tipo, categoria, valor, referencia_tabela, referencia_id)
+      VALUES ($1, 'despesa', 'estorno', $2, 'vendas', $3)`,
+      [venda.rows[0].ponto_id, venda.rows[0].valor_total, id],
+    );
+
+    await client.query(
+      `UPDATE vendas SET status = 'cancelada', data_cancelamento = CURRENT_TIMESTAMP WHERE id = $1`,
+      [id],
+    );
+
+    await client.query("COMMIT");
+
+    res.json({
+      success: true,
+      message: "Venda cancelada com sucesso",
+    });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Erro ao cancelar venda:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro ao cancelar venda",
+      error: error.message,
+    });
+  } finally {
+    client.release();
+  }
+}
