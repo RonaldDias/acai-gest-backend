@@ -11,4 +11,11 @@ router.get(
   relatoriosController.vendas,
 );
 
+router.get(
+  "/fluxo-caixa",
+  authenticate,
+  authorize("dono"),
+  relatoriosController.cashFlow,
+);
+
 export default router;
