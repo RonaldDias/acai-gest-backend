@@ -8,6 +8,8 @@ import productsRoutes from "./src/routes/products.js";
 import salesRoutes from "./src/routes/sales.js";
 import vendedoresRoutes from "./src/routes/vendedores.js";
 import relatoriosRoutes from "./src/routes/relatorios.js";
+import pontosRoutes from "./src/routes/pontos.js";
+
 dotenv.config();
 
 const app = express();
@@ -34,6 +36,7 @@ app.use("/api/products", productsRoutes);
 app.use("/api/sales", salesRoutes);
 app.use("/api/vendedores", vendedoresRoutes);
 app.use("/api/relatorios", relatoriosRoutes);
+app.use("/api/pontos", pontosRoutes);
 
 app.use("*", (req, res) => {
   res.status(404).json({
