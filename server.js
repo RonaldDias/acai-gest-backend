@@ -9,6 +9,7 @@ import salesRoutes from "./src/routes/sales.js";
 import vendedoresRoutes from "./src/routes/vendedores.js";
 import relatoriosRoutes from "./src/routes/relatorios.js";
 import pontosRoutes from "./src/routes/pontos.js";
+import empresasRoutes from "./src/routes/empresas.js";
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use("/api/sales", salesRoutes);
 app.use("/api/vendedores", vendedoresRoutes);
 app.use("/api/relatorios", relatoriosRoutes);
 app.use("/api/pontos", pontosRoutes);
+app.use("/api/empresas", empresasRoutes);
 
 app.use("*", (req, res) => {
   res.status(404).json({
