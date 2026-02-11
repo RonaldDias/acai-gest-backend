@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import express from "express";
 import { testConnection } from "./src/config/database.js";
+import { testMercadoPagoConnection } from "./src/config/mercadopago.js";
 import { corsMiddleware } from "./src/middleware/cors.js";
 import { loggerMiddleware } from "./src/middleware/logger.js";
 import authRoutes from "./src/routes/auth.js";
@@ -17,6 +18,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 testConnection();
+testMercadoPagoConnection();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
