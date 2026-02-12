@@ -11,6 +11,8 @@ import vendedoresRoutes from "./src/routes/vendedores.js";
 import relatoriosRoutes from "./src/routes/relatorios.js";
 import pontosRoutes from "./src/routes/pontos.js";
 import empresasRoutes from "./src/routes/empresas.js";
+import pagamentosRoutes from "./src/routes/pagamentos.js";
+import webhooksRoutes from "./src/routes/mercadoPago/webhooks.js";
 
 dotenv.config();
 
@@ -41,6 +43,8 @@ app.use("/api/vendedores", vendedoresRoutes);
 app.use("/api/relatorios", relatoriosRoutes);
 app.use("/api/pontos", pontosRoutes);
 app.use("/api/empresas", empresasRoutes);
+app.use("/api/pagamentos", pagamentosRoutes);
+app.use("/api/webhooks", webhooksRoutes);
 
 app.use("*", (req, res) => {
   res.status(404).json({

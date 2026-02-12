@@ -1,6 +1,6 @@
-import pool from "../config/database.js";
-import { hashPassword, generateVendedorPassword } from "../utils/auth.js";
-import { cpfExists } from "../utils/validators.js";
+import pool from "../../config/database.js";
+import { hashPassword, generateVendedorPassword } from "../../utils/auth.js";
+import { cpfExists } from "../../utils/validators.js";
 
 export const createVendedor = async (req, res) => {
   const client = await pool.connect();

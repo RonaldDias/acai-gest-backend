@@ -5,7 +5,7 @@ import {
   loginUsuario,
   forgotPassword,
   resetPassword,
-} from "../controllers/authController.js";
+} from "../controllers/cadastro/authController.js";
 import { refreshAccessToken } from "../controllers/refreshController.js";
 
 const router = express.Router();

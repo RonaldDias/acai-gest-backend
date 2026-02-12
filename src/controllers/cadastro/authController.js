@@ -1,4 +1,4 @@
-import pool from "../config/database.js";
+import pool from "../../config/database.js";
 import {
   hashPassword,
   comparePassword,
@@ -7,13 +7,14 @@ import {
   getRefreshTokenExpiry,
   generatePasswordResetToken,
   getPasswordResetTokenExpiry,
-} from "../utils/auth.js";
+} from "../../utils/auth.js";
 import {
   sendWelcomeEmail,
   sendPasswordResetEmail,
   sendPasswordChangedEmail,
-} from "../services/emailService.js";
-import { cpfExists, emailExists } from "../utils/validators.js";
+} from "../../services/emailService.js";
+import { cpfExists, emailExists } from "../../utils/validators.js";
+import { gerarPagamentoPix } from "../../services/pagamentoService.js";
 
 export const cadastrarUsuario = async (req, res) => {
   const client = await pool.connect();
@@ -31,6 +32,7 @@ export const cadastrarUsuario = async (req, res) => {
       plano,
       quantidadePontos,
       formaPagamento,
+      tipoAssinatura,
     } = req.body;
 
     await client.query("BEGIN");
@@ -59,11 +61,12 @@ export const cadastrarUsuario = async (req, res) => {
       });
     }
 
+    const cpfLimpo = cpf.replace(/\D/g, "");
     const senhaHash = await hashPassword(senha);
 
     const resultEmpresa = await client.query(
       `INSERT INTO empresas (nome, cnpj, telefone, email, endereco, plano, quantidade_pontos, forma_pagamento, ativo)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false)
         RETURNING id`,
       [
         nomeEmpresa,
@@ -83,7 +86,7 @@ export const cadastrarUsuario = async (req, res) => {
     for (let i = 0; i < quantidadePontos; i++) {
       const resultPonto = await client.query(
         `INSERT INTO pontos (empresa_id, nome, endereco, ativo)
-        VALUES ($1, $2, $3, true)
+        VALUES ($1, $2, $3, false)
         RETURNING id`,
         [empresaId, nomeEmpresa, endereco],
       );
@@ -94,53 +97,71 @@ export const cadastrarUsuario = async (req, res) => {
 
     const resultUsuario = await client.query(
       `INSERT INTO usuarios (empresa_id, ponto_id, nome, cpf, email, senha, role, aceitou_termos, ativo)
-      VALUES ($1, $2, $3, $4, $5, $6, 'dono', true, true)
+      VALUES ($1, $2, $3, $4, $5, $6, 'dono', true, false)
       RETURNING id, nome, email, cpf, role, data_cadastro`,
       [empresaId, pontoId, nome, cpfLimpo, email, senhaHash],
     );
 
     const usuario = resultUsuario.rows[0];
 
-    await client.query("COMMIT");
+    const valores = {
+      basico: { mensal: 149.9, anual: 1619.1 },
+      top: { mensal: 249.9, anual: 2699.1 },
+    };
 
-    try {
-      await sendWelcomeEmail(usuario.nome, usuario.email);
-    } catch (emailError) {
-      console.error("Erro ao enviar email de boas-vindas:", emailError);
+    const valor = valores[plano.toLowerCase()]?.[tipoAssinatura];
+
+    if (!valor) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        success: false,
+        message: "Plano ou tipo de assinatura inválido",
+      });
     }
 
-    const token = generateToken({
-      userId: usuario.id,
-      email: usuario.email,
-      role: usuario.role,
-      empresaId: empresaId,
-      pontoId: pontoId,
-    });
+    const descricao = `Assinatura ${tipoAssinatura} - Plano ${plano.toUpperCase()} - ${nomeEmpresa}`;
 
-    const refreshToken = generateRefreshToken();
-    const refreshTokenExpiry = getRefreshTokenExpiry();
+    const mercadoPagoPayment = await gerarPagamentoPix(valor, descricao, email);
 
-    await client.query(
-      `INSERT INTO refresh_tokens (user_id, token, expires_at)
-      VALUES ($1, $2, $3)`,
-      [usuario.id, refreshToken, refreshTokenExpiry],
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 1);
+
+    const paymentResult = await client.query(
+      `INSERT INTO pagamentos (empresa_id, valor, status, metodo_pagamento, 
+    data_vencimento, qr_code, qr_code_base64, payment_id, tipo_assinatura)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+  RETURNING id`,
+      [
+        empresaId,
+        valor,
+        "pendente",
+        "pix",
+        dueDate,
+        mercadoPagoPayment.qr_code,
+        mercadoPagoPayment.qr_code_base64,
+        mercadoPagoPayment.id,
+        tipoAssinatura,
+      ],
     );
+
+    await client.query("COMMIT");
 
     res.status(201).json({
       success: true,
-      message: "Cadastro realizado com sucesso",
+      message: "Cadastro criado. Aguardando pagamento.",
       user: {
         id: usuario.id,
         nome: usuario.nome,
         email: usuario.email,
-        cpf: cpfLimpo,
-        role: usuario.role,
         empresaId: empresaId,
-        pontoId: pontoId,
-        createdAt: usuario.data_cadastro,
       },
-      token,
-      refreshToken,
+      pagamento: {
+        id: paymentResult.rows[0].id,
+        valor,
+        qr_code: mercadoPagoPayment.qr_code,
+        qr_code_base64: mercadoPagoPayment.qr_code_base64,
+        ticket_url: mercadoPagoPayment.ticket_url,
+      },
     });
   } catch (error) {
     await client.query("ROLLBACK");

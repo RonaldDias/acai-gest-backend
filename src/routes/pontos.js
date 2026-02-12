@@ -1,5 +1,5 @@
 import express from "express";
-import * as pontosController from "../controllers/pontosController.js";
+import * as pontosController from "../controllers/cadastro/pontosController.js";
 import { authenticate, authorize } from "../middleware/auth.js";
 
 const router = express.Router();

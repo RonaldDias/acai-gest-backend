@@ -5,7 +5,7 @@ import {
   listVendedores,
   updateVendedor,
   deleteVendedor,
-} from "../controllers/vendedoresController.js";
+} from "../controllers/cadastro/vendedoresController.js";
 import { authenticate, authorize } from "../middleware/auth.js";
 
 const router = express.Router();
