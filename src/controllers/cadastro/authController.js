@@ -14,7 +14,7 @@ import {
   sendPasswordChangedEmail,
 } from "../../services/emailService.js";
 import { cpfExists, emailExists } from "../../utils/validators.js";
-import { gerarPagamentoPix } from "../../services/pagamentoService.js";
+import { generatePixPayment } from "../../services/pagamentoService.js";
 
 export const cadastrarUsuario = async (req, res) => {
   const client = await pool.connect();
@@ -121,7 +121,11 @@ export const cadastrarUsuario = async (req, res) => {
 
     const descricao = `Assinatura ${tipoAssinatura} - Plano ${plano.toUpperCase()} - ${nomeEmpresa}`;
 
-    const mercadoPagoPayment = await gerarPagamentoPix(valor, descricao, email);
+    const mercadoPagoPayment = await generatePixPayment(
+      valor,
+      descricao,
+      email,
+    );
 
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 1);

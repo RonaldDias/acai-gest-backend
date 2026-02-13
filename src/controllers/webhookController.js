@@ -1,5 +1,6 @@
 import pool from "../config/database.js";
 import { sendWelcomeEmail } from "../services/emailService.js";
+import { searchStatusPayment } from "../services/pagamentoService.js";
 
 export const mercadoPagoWebhook = async (req, res) => {
   try {
@@ -11,6 +12,18 @@ export const mercadoPagoWebhook = async (req, res) => {
     }
 
     const paymentId = data.id;
+
+    const paymentStatus = await searchStatusPayment(paymentId);
+    console.log("Status do pagamento:", paymentStatus);
+
+    if (paymentStatus.status !== "aprovado") {
+      console.log("Pagamento ainda não aprovado, ignorando webhook");
+      return res.status(200).json({
+        success: true,
+        message: "Pagamento não aprovado ainda",
+      });
+    }
+
     const client = await pool.connect();
 
     try {

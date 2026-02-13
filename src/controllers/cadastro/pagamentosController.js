@@ -1,5 +1,5 @@
 import pool from "../../config/database.js";
-import { gerarPagamentoPix } from "../../services/pagamentoService.js";
+import { generatePixPayment } from "../../services/pagamentoService.js";
 
 export const criarPagamentoPix = async (req, res) => {
   const client = await pool.connect();
@@ -39,7 +39,7 @@ export const criarPagamentoPix = async (req, res) => {
     const empresa = empresaResult.rows[0];
     const descricao = `Assinatura ${tipo_assinatura} - Plano ${plano.toUpperCase()} - ${empresa.nome}`;
 
-    const mercadoPagoPayment = await gerarPagamentoPix(
+    const mercadoPagoPayment = await generatePixPayment(
       valor,
       descricao,
       empresa.email,

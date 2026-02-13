@@ -1,6 +1,6 @@
 import { paymentClient } from "../config/mercadopago.js";
 
-export const gerarPagamentoPix = async (valor, descricao, email) => {
+export const generatePixPayment = async (valor, descricao, email) => {
   try {
     const body = {
       transaction_amount: valor,
@@ -23,6 +23,20 @@ export const gerarPagamentoPix = async (valor, descricao, email) => {
     };
   } catch (error) {
     console.error("Erro ao gerar pagamento PIX:", error);
+    throw error;
+  }
+};
+
+export const searchStatusPayment = async (paymentId) => {
+  try {
+    const payment = await paymentClient.get({ id: paymentId });
+    return {
+      id: payment.id,
+      status: payment.status,
+      status_detail: payment.status_detail,
+    };
+  } catch (error) {
+    console.error(("Erro ao buscar status do pagamento:", error));
     throw error;
   }
 };
