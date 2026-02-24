@@ -30,7 +30,7 @@ export const mercadoPagoWebhook = async (req, res) => {
       await client.query("BEGIN");
 
       const paymentResult = await client.query(
-        `SELECT p.id, p.empresa_id, p.status, e.email, e.nome as empresa_nome
+        `SELECT p.id, p.empresa_id, p.status, p.tipo_assinatura, e.email, e.nome as empresa_nome
         FROM pagamentos p
         INNER JOIN empresas e ON p.empresa_id = e.id
         WHERE p.payment_id = $1`,
@@ -78,6 +78,24 @@ export const mercadoPagoWebhook = async (req, res) => {
       const userResult = await client.query(
         `SELECT nome, email FROM usuarios WHERE empresa_id = $1 AND role = 'dono'`,
         [pagamento.empresa_id],
+      );
+
+      const dueDate =
+        pagamento.tipo_assinatura === "anual"
+          ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+          : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+      await client.query(
+        `INSERT INTO assinaturas (empresa_id, status, plano, tipo, data_vencimento)
+        VALUES ($1, 'ativa', $2, $3, $4)
+        ON CONFLICT (empresa_id) DO UPDATE SET
+        status = 'ativa', plano = $2, tipo = $3, data_vencimento = $4, updated_at = NOW()`,
+        [
+          pagamento.empresa_id,
+          pagamento.plano,
+          pagamento.tipo_assinatura,
+          dueDate,
+        ],
       );
 
       await client.query("COMMIT");

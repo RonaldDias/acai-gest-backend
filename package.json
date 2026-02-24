@@ -17,7 +17,9 @@
     "migrate:up": "DATABASE_URL=postgresql://postgres:acaigest@localhost:5432/acai_gest node-pg-migrate up",
     "migrate:down": "node-pg-migrate down",
     "migrate:create": "node-pg-migrate create",
-    "migrate:docker": "DATABASE_URL=postgresql://postgres:acaigest@postgres:5432/acai_gest npx node-pg-migrate up"
+    "migrate:docker": "DATABASE_URL=postgresql://postgres:acaigest@postgres:5432/acai_gest npx node-pg-migrate up",
+    "lint:check": "prettier --check .",
+    "lint:fix": "prettier --write ."
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
@@ -28,8 +30,10 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mercadopago": "^2.0.15",
+    "node-cron": "^4.2.1",
     "nodemailer": "^7.0.12",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "prettier": "^3.8.1"
   },
   "devDependencies": {
     "node-pg-migrate": "^7.9.1"

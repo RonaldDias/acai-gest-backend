@@ -27,7 +27,7 @@ services:
     environment:
       PORT: 3001
       NODE_ENV: development
-      FRONTEND_URL: gttp://localhost:3000
+      FRONTEND_URL: http://localhost:3000
       JWT_SECRET: acai_gest_super_secret_key_2026
       JWT_EXPIRES_IN: 7d
       DB_HOST: postgres

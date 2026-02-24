@@ -5,6 +5,7 @@ import {
   loginUsuario,
   forgotPassword,
   resetPassword,
+  getUsuarioStatus,
 } from "../controllers/cadastro/authController.js";
 import { refreshAccessToken } from "../controllers/refreshController.js";
 
@@ -102,5 +103,7 @@ router.post(
   ],
   resetPassword,
 );
+
+router.get("/usuarios/:empresaId/status", getUsuarioStatus);
 
 export default router;

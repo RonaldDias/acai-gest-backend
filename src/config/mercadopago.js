@@ -1,4 +1,9 @@
-import { MercadoPagoConfig, Payment, PreApproval } from "mercadopago";
+import {
+  MercadoPagoConfig,
+  Payment,
+  PreApproval,
+  Preference,
+} from "mercadopago";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -12,6 +17,7 @@ const client = new MercadoPagoConfig({
 
 export const paymentClient = new Payment(client);
 export const subscriptionClient = new PreApproval(client);
+export const preferenceClient = new Preference(client);
 
 export async function testMercadoPagoConnection() {
   try {

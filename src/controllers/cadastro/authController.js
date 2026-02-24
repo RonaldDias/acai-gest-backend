@@ -14,7 +14,11 @@ import {
   sendPasswordChangedEmail,
 } from "../../services/emailService.js";
 import { cpfExists, emailExists } from "../../utils/validators.js";
-import { generatePixPayment } from "../../services/pagamentoService.js";
+import {
+  generatePixPayment,
+  createRecurringSubscription,
+  createCheckoutPreference,
+} from "../../services/pagamentoService.js";
 
 export const cadastrarUsuario = async (req, res) => {
   const client = await pool.connect();
@@ -104,6 +108,55 @@ export const cadastrarUsuario = async (req, res) => {
 
     const usuario = resultUsuario.rows[0];
 
+    if (formaPagamento === "CARTAO") {
+      const valores = {
+        basico: { mensal: 149.9, anual: 1619.1 },
+        top: { mensal: 249.9, anual: 2699.1 },
+      };
+
+      if (tipoAssinatura === "mensal") {
+        const valor = valores[plano.toLowerCase()]?.mensal;
+
+        const subscription = await createRecurringSubscription(
+          email,
+          plano,
+          valor,
+        );
+
+        await client.query("COMMIT");
+
+        return res.status(201).json({
+          success: true,
+          message: "Assinatura criada. Complete o pagamento.",
+          user: {
+            id: usuario.id,
+            nome: usuario.nome,
+            email: usuario.email,
+            empresaId: empresaId,
+          },
+          init_point: subscription.init_point,
+        });
+      } else if (tipoAssinatura === "anual") {
+        const valor = valores[plano.toLowerCase()]?.anual;
+
+        const checkout = await createCheckoutPreference(email, plano, valor);
+
+        await client.query("COMMIT");
+
+        return res.status(201).json({
+          success: true,
+          message: "Checkout criado. Complete o pagamento.",
+          user: {
+            id: usuario.id,
+            nome: usuario.nome,
+            email: usuario.email,
+            empresaId: empresaId,
+          },
+          init_point: checkout.init_point,
+        });
+      }
+    }
+
     const valores = {
       basico: { mensal: 149.9, anual: 1619.1 },
       top: { mensal: 249.9, anual: 2699.1 },
@@ -132,9 +185,9 @@ export const cadastrarUsuario = async (req, res) => {
 
     const paymentResult = await client.query(
       `INSERT INTO pagamentos (empresa_id, valor, status, metodo_pagamento, 
-    data_vencimento, qr_code, qr_code_base64, payment_id, tipo_assinatura)
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-  RETURNING id`,
+        data_vencimento, qr_code, qr_code_base64, payment_id, tipo_assinatura)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING id`,
       [
         empresaId,
         valor,
@@ -389,5 +442,25 @@ export const resetPassword = async (req, res) => {
     });
   } finally {
     client.release();
+  }
+};
+
+export const getUsuarioStatus = async (req, res) => {
+  try {
+    const { empresaId } = req.params;
+
+    const result = await pool.query(
+      "SELECT ativo FROM usuarios WHERE empresa_id = $1 AND role = 'dono' LIMIT 1",
+      [empresaId],
+    );
+
+    if (result.rows.length === 0) {
+      return res.json({ success: false, ativo: false });
+    }
+
+    res.json({ success: true, ativo: result.rows[0].ativo });
+  } catch (error) {
+    console.error("Erro ao buscar status:", error);
+    res.status(500).json({ success: false, ativo: false });
   }
 };

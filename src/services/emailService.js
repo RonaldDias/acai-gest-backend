@@ -128,3 +128,38 @@ export const sendPasswordChangedEmail = async (nome, email) => {
     throw error;
   }
 };
+
+export const sendExpirationReminderEmail = async (nome, email, dueDate) => {
+  const data = new Date(dueDate).toLocaleDateString("pt-BR");
+
+  const mailOptions = {
+    from: `"Açaí Gest" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "Sua assinatura vence em 3 dias - Açaí Gest",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #8B4513;">Olá, ${nome}!</h2>
+        <p>Sua assinatura do <strong>Açaí Gest</strong> vence em <strong>3 dias</strong>, no dia <strong>${data}</strong>.</p>
+        
+        <div style="background-color: #fff3e0; padding: 20px; border-radius: 5px; margin: 20px 0;">
+          <p style="margin: 0; color: #e65100;">⚠️ Renove sua assinatura para não perder o acesso ao sistema.</p>
+        </div>
+        
+        <p>Se já realizou o pagamento, desconsidere este aviso.</p>
+        
+        <p style="margin-top: 30px;">
+          Atenciosamente,<br>
+          <strong>Equipe Açaí Gest</strong>
+        </p>
+      </div>
+      `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Email de vencimento enviado para ${email}`);
+  } catch (error) {
+    console.error("Erro ao enviar email de vencimento:", error);
+    throw error;
+  }
+};
