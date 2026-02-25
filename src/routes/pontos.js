@@ -1,18 +1,41 @@
 import express from "express";
 import * as pontosController from "../controllers/cadastro/pontosController.js";
-import { authenticate, authorize } from "../middleware/auth.js";
+import {
+  authenticate,
+  authorize,
+  checkSubscription,
+} from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.post("/", authenticate, authorize("dono"), pontosController.create);
+router.post(
+  "/",
+  authenticate,
+  checkSubscription,
+  authorize("dono"),
+  pontosController.create,
+);
 
-router.get("/", authenticate, authorize("dono"), pontosController.getAll);
+router.get(
+  "/",
+  authenticate,
+  checkSubscription,
+  authorize("dono"),
+  pontosController.getAll,
+);
 
-router.put("/:id", authenticate, authorize("dono"), pontosController.update);
+router.put(
+  "/:id",
+  authenticate,
+  checkSubscription,
+  authorize("dono"),
+  pontosController.update,
+);
 
 router.delete(
   "/:id",
   authenticate,
+  checkSubscription,
   authorize("dono"),
   pontosController.deletePonto,
 );

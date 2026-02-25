@@ -1,6 +1,10 @@
 import express from "express";
 import * as salesController from "../controllers/salesController.js";
-import { authenticate, authorize } from "../middleware/auth.js";
+import {
+  authenticate,
+  checkSubscription,
+  authorize,
+} from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -13,6 +17,7 @@ router.get("/summary/today", salesController.summaryToday);
 router.post(
   "/:id/cancel",
   authenticate,
+  checkSubscription,
   authorize("dono", "vendedor"),
   salesController.cancel,
 );

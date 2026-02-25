@@ -6,13 +6,18 @@ import {
   updateVendedor,
   deleteVendedor,
 } from "../controllers/cadastro/vendedoresController.js";
-import { authenticate, authorize } from "../middleware/auth.js";
+import {
+  authenticate,
+  checkSubscription,
+  authorize,
+} from "../middleware/auth.js";
 
 const router = express.Router();
 
 router.post(
   "/",
   authenticate,
+  checkSubscription,
   authorize("dono"),
   [
     body("nome").notEmpty().withMessage("Nome é obrigatório"),
@@ -24,11 +29,18 @@ router.post(
   createVendedor,
 );
 
-router.get("/", authenticate, authorize("dono"), listVendedores);
+router.get(
+  "/",
+  authenticate,
+  checkSubscription,
+  authorize("dono"),
+  listVendedores,
+);
 
 router.put(
   "/:id",
   authenticate,
+  checkSubscription,
   authorize("dono"),
   [
     body("nome").optional().notEmpty().withMessage("Nome não pode ser vazio"),
@@ -40,6 +52,12 @@ router.put(
   updateVendedor,
 );
 
-router.delete("/:id", authenticate, authorize("dono"), deleteVendedor);
+router.delete(
+  "/:id",
+  authenticate,
+  checkSubscription,
+  authorize("dono"),
+  deleteVendedor,
+);
 
 export default router;
