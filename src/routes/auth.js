@@ -8,6 +8,7 @@ import {
   getUsuarioStatus,
 } from "../controllers/cadastro/authController.js";
 import { refreshAccessToken } from "../controllers/refreshController.js";
+import { loginLimiter } from "../middleware/rateLimiter.js";
 
 const router = express.Router();
 
@@ -54,7 +55,7 @@ const cadastroValidation = [
     .withMessage("Forma de pagamento inválida"),
 ];
 
-router.post("/login", loginValidation, loginUsuario);
+router.post("/login", loginLimiter, loginValidation, loginUsuario);
 
 router.post("/cadastro", cadastroValidation, cadastrarUsuario);
 

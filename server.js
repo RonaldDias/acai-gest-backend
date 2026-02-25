@@ -4,6 +4,7 @@ import { testConnection } from "./src/config/database.js";
 import { testMercadoPagoConnection } from "./src/config/mercadopago.js";
 import { corsMiddleware } from "./src/middleware/cors.js";
 import { loggerMiddleware } from "./src/middleware/logger.js";
+import { globalLimiter } from "./src/middleware/rateLimiter.js";
 import authRoutes from "./src/routes/auth.js";
 import productsRoutes from "./src/routes/products.js";
 import salesRoutes from "./src/routes/sales.js";
@@ -28,6 +29,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(corsMiddleware);
 app.use(loggerMiddleware);
+app.use(globalLimiter);
 
 app.get("/api/health", (req, res) => {
   res.json({
