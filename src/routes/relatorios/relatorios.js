@@ -1,10 +1,10 @@
 import express from "express";
-import * as relatoriosController from "../controllers/relatoriosController.js";
+import * as relatoriosController from "../../controllers/relatoriosController.js";
 import {
   authenticate,
   checkSubscription,
   authorize,
-} from "../middleware/auth.js";
+} from "../../middleware/auth.js";
 
 const router = express.Router();
 

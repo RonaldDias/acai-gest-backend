@@ -1,4 +1,5 @@
 import pool from "../config/database.js";
+import { logAudit } from "../utils/auditLogger.js";
 
 export async function create(req, res) {
   const client = await pool.connect();
@@ -103,6 +104,15 @@ export async function create(req, res) {
     }
 
     await client.query("COMMIT");
+
+    await logAudit(
+      req.user.userId,
+      "criar",
+      "vendas",
+      venda.id,
+      { total, ponto_id, vendedor_id },
+      req,
+    );
 
     res.status(201).json({
       success: true,
@@ -274,6 +284,15 @@ export async function cancel(req, res) {
     );
 
     await client.query("COMMIT");
+
+    await logAudit(
+      req.user.userId,
+      "cancelar",
+      "vendas",
+      parseInt(id),
+      { ponto_id: venda.rows[0].ponto_id },
+      req,
+    );
 
     res.json({
       success: true,

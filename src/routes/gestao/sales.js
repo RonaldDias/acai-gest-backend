@@ -1,10 +1,10 @@
 import express from "express";
-import * as salesController from "../controllers/salesController.js";
+import * as salesController from "../../controllers/salesController.js";
 import {
   authenticate,
   checkSubscription,
   authorize,
-} from "../middleware/auth.js";
+} from "../../middleware/auth.js";
 
 const router = express.Router();
 

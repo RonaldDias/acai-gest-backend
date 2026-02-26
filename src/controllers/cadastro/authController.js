@@ -8,12 +8,13 @@ import {
   generatePasswordResetToken,
   getPasswordResetTokenExpiry,
 } from "../../utils/auth.js";
+import { cpfExists, emailExists } from "../../utils/validators.js";
+import { logAudit } from '../../utils/auditLogger.js'
 import {
   sendWelcomeEmail,
   sendPasswordResetEmail,
   sendPasswordChangedEmail,
 } from "../../services/emailService.js";
-import { cpfExists, emailExists } from "../../utils/validators.js";
 import {
   generatePixPayment,
   createRecurringSubscription,
@@ -295,6 +296,8 @@ export const loginUsuario = async (req, res) => {
       VALUES ($1, $2, $3)`,
       [usuario.id, refreshToken, refreshTokenExpiry],
     );
+
+    await logAudit(usuario.id, 'login', 'usuarios', usuario.id, { email: usuario.email }, req)
 
     res.json({
       success: true,

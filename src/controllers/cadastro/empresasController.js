@@ -1,4 +1,5 @@
 import pool from "../../config/database.js";
+import { logAudit } from "../../utils/auditLogger.js";
 
 export async function updatePlan(req, res) {
   const client = await pool.connect();
@@ -66,6 +67,15 @@ export async function updatePlan(req, res) {
     );
 
     await client.query("COMMIT");
+
+    await logAudit(
+      req.user.userId,
+      "alterar_plano",
+      "empresas",
+      empresaId,
+      { plano_anterior: planoAtual, plano_novo: plano },
+      req,
+    );
 
     res.json({
       success: true,

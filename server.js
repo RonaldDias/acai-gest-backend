@@ -2,19 +2,20 @@ import dotenv from "dotenv";
 import express from "express";
 import { testConnection } from "./src/config/database.js";
 import { testMercadoPagoConnection } from "./src/config/mercadopago.js";
+import { startSubscriptionJob } from "./src/jobs/assinaturaJob.js";
 import { corsMiddleware } from "./src/middleware/cors.js";
 import { loggerMiddleware } from "./src/middleware/logger.js";
 import { globalLimiter } from "./src/middleware/rateLimiter.js";
-import authRoutes from "./src/routes/auth.js";
-import productsRoutes from "./src/routes/products.js";
-import salesRoutes from "./src/routes/sales.js";
-import vendedoresRoutes from "./src/routes/vendedores.js";
-import relatoriosRoutes from "./src/routes/relatorios.js";
-import pontosRoutes from "./src/routes/pontos.js";
+import authRoutes from "./src/routes/auth/auth.js";
 import empresasRoutes from "./src/routes/empresas.js";
 import pagamentosRoutes from "./src/routes/mercadoPago/pagamentos.js";
 import webhooksRoutes from "./src/routes/mercadoPago/webhooks.js";
-import { startSubscriptionJob } from "./src/jobs/assinaturaJob.js";
+import pontosRoutes from "./src/routes/gestao/pontos.js";
+import productsRoutes from "./src/routes/gestao/products.js";
+import relatoriosRoutes from "./src/routes/relatorios/relatorios.js";
+import salesRoutes from "./src/routes/gestao/sales.js";
+import vendedoresRoutes from "./src/routes/gestao/vendedores.js";
+import auditLogsRoutes from "./src/routes/relatorios/auditLogs.js";
 
 dotenv.config();
 
@@ -49,6 +50,7 @@ app.use("/api/pontos", pontosRoutes);
 app.use("/api/empresas", empresasRoutes);
 app.use("/api/pagamentos", pagamentosRoutes);
 app.use("/api/webhooks", webhooksRoutes);
+app.use("/api/audit-logs", auditLogsRoutes);
 
 app.use("*", (req, res) => {
   res.status(404).json({

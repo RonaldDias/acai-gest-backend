@@ -1,10 +1,10 @@
 import express from "express";
-import * as pontosController from "../controllers/cadastro/pontosController.js";
+import * as pontosController from "../../controllers/cadastro/pontosController.js";
 import {
   authenticate,
   authorize,
   checkSubscription,
-} from "../middleware/auth.js";
+} from "../../middleware/auth.js";
 
 const router = express.Router();
 

@@ -6,9 +6,9 @@ import {
   forgotPassword,
   resetPassword,
   getUsuarioStatus,
-} from "../controllers/cadastro/authController.js";
-import { refreshAccessToken } from "../controllers/refreshController.js";
-import { loginLimiter } from "../middleware/rateLimiter.js";
+} from "../../controllers/cadastro/authController.js";
+import { refreshAccessToken } from "../../controllers/refreshController.js";
+import { loginLimiter } from "../../middleware/rateLimiter.js";
 
 const router = express.Router();
 

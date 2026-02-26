@@ -5,12 +5,12 @@ import {
   listVendedores,
   updateVendedor,
   deleteVendedor,
-} from "../controllers/cadastro/vendedoresController.js";
+} from "../../controllers/cadastro/vendedoresController.js";
 import {
   authenticate,
   checkSubscription,
   authorize,
-} from "../middleware/auth.js";
+} from "../../middleware/auth.js";
 
 const router = express.Router();
 
