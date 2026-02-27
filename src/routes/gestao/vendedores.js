@@ -1,5 +1,5 @@
 import express from "express";
-import { body } from "express-validator";
+import { validationResult } from "express-validator";
 import {
   createVendedor,
   listVendedores,
@@ -11,21 +11,30 @@ import {
   checkSubscription,
   authorize,
 } from "../../middleware/auth.js";
+import {
+  validateCreateVendedor,
+  validateUpdateVendedor,
+} from "../../middleware/validators.js";
 
 const router = express.Router();
+
+const handleValidation = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res
+      .status(400)
+      .json({ success: false, message: errors.array()[0].msg });
+  }
+  next();
+};
 
 router.post(
   "/",
   authenticate,
   checkSubscription,
   authorize("dono"),
-  [
-    body("nome").notEmpty().withMessage("Nome é obrigatório"),
-    body("cpf")
-      .matches(/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/)
-      .withMessage("CPF inválido"),
-    body("pontoId").isInt().withMessage("Ponto ID é obrigatório"),
-  ],
+  validateCreateVendedor,
+  handleValidation,
   createVendedor,
 );
 
@@ -42,13 +51,8 @@ router.put(
   authenticate,
   checkSubscription,
   authorize("dono"),
-  [
-    body("nome").optional().notEmpty().withMessage("Nome não pode ser vazio"),
-    body("ativo")
-      .optional()
-      .isBoolean()
-      .withMessage("Ativo deve ser verdadeiro ou falso"),
-  ],
+  validateUpdateVendedor,
+  handleValidation,
   updateVendedor,
 );
 
