@@ -45,6 +45,7 @@ services:
       - ./migrations:/app/migrations
       - ./package.json:/app/package.json
       - ./.env:/app/.env
+      - ./scripts:/app/scripts
     command: npm run dev
 
 volumes:
