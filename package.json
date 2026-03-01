@@ -6,7 +6,6 @@
     "type": "git",
     "url": "git+https://github.com/RonaldDias/acai-gest-backend.git"
   },
-  "license": "MIT",
   "author": "",
   "type": "module",
   "main": "server.js",
