@@ -10,7 +10,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgres/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready", "-U", "postgres"]
       interval: 10s
@@ -24,18 +24,8 @@ services:
     container_name: acai_gest_backend
     ports:
       - "3001:3001"
-    environment:
-      PORT: 3001
-      NODE_ENV: development
-      FRONTEND_URL: http://localhost:3000
-      JWT_SECRET: acai_gest_super_secret_key_2026
-      JWT_EXPIRES_IN: 7d
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: acaigest
-      DB_NAME: acai_gest
-      DB_MAX_CONNECTIONS: 20
+    env_file:
+      - .env
     depends_on:
       postgres:
         condition: service_healthy
@@ -44,7 +34,6 @@ services:
       - ./server.js:/app/server.js
       - ./migrations:/app/migrations
       - ./package.json:/app/package.json
-      - ./.env:/app/.env
       - ./scripts:/app/scripts
     command: npm run dev
 

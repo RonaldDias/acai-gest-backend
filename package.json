@@ -32,11 +32,11 @@
     "jsonwebtoken": "^9.0.2",
     "mercadopago": "^2.0.15",
     "node-cron": "^4.2.1",
+    "node-pg-migrate": "^7.9.1",
     "nodemailer": "^7.0.12",
-    "pg": "^8.16.3",
-    "prettier": "^3.8.1"
+    "pg": "^8.16.3"
   },
   "devDependencies": {
-    "node-pg-migrate": "^7.9.1"
+    "prettier": "^3.8.1"
   }
 }
