@@ -14,7 +14,7 @@ COPY --from=builder /app/node_modules ./node_modules
 
 COPY . .
 
-RUN chown -R node:noe /app
+RUN chown -R node:node /app
 
 USER node
 
