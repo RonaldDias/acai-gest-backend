@@ -30,4 +30,6 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+rm -f $COMPRESSED_FILE
+
 echo "Backup concluido: ${DATE}"
