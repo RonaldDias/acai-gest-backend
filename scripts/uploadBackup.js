@@ -1,5 +1,5 @@
 import pkg from "@aws-sdk/client-s3";
-import { readFileSync, unlinkSync } from "fs";
+import { readFileSync } from "fs";
 import { basename } from "path";
 import dotenv from "dotenv";
 
@@ -35,9 +35,6 @@ try {
 
   await client.send(command);
   console.log(`Backup enviado para R2: ${fileName}`);
-
-  unlinkSync(filePath);
-  console.log("Arquivo local removido");
 } catch (error) {
   console.error("Erro ao enviar backup:", error);
   process.exit(1);
