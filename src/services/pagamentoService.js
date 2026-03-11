@@ -52,7 +52,7 @@ export const createRecurringSubscription = async (
 ) => {
   try {
     const body = {
-      back_url: "https://cloacal-unprivitely-terence.ngrok-free.dev",
+      back_url: "https://acaigest.com.br/dashboard/vendas",
       reason: `Assinatura ${planType} - Açaí Gest`,
       auto_recurring: {
         frequency: 1,
@@ -97,8 +97,8 @@ export const createCheckoutPreference = async (email, planType, planValue) => {
       installments: 12,
     },
     back_urls: {
-      success: "https://cloacal-unprivitely-terence.ngrok-free.dev",
-      failure: "https://cloacal-unprivitely-terence.ngrok-free.dev",
+      success: "https://acaigest.com.br/dashboard/vendas",
+      failure: "https://acaigest.com.br/cadastro",
     },
     auto_return: "approved",
   };
