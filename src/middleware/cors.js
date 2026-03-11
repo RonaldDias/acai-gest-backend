@@ -1,5 +1,9 @@
 export function corsMiddleware(req, res, next) {
-  const allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:3000"];
+  const allowedOrigins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://acaigest.com.br",
+  ];
   const origin = req.headers.origin;
 
   if (allowedOrigins.includes(origin)) {

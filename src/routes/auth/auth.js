@@ -1,5 +1,6 @@
 import express from "express";
-import { body, validationResult } from "express-validator";
+import { body } from "express-validator";
+import { emailExists } from "../../utils/validators.js";
 import {
   cadastrarUsuario,
   loginUsuario,
@@ -13,7 +14,7 @@ import { loginLimiter } from "../../middleware/rateLimiter.js";
 const router = express.Router();
 
 const loginValidation = [
-  body("login").isEmail().withMessage("Email ou CPF é obrigatório"),
+  body("login").notEmpty().withMessage("Email ou CPF é obrigatório"),
   body("senha").notEmpty().withMessage("Senha é obrigatória"),
 ];
 
@@ -65,11 +66,7 @@ router.get("/validate-email/:email", async (req, res) => {
   try {
     const { email } = req.params;
 
-    // TODO: Verificar no banco
-    // const usuario = await Usuario.findOne({ email });
-
-    const emailsExistentes = ["admin@acaigest.com", "teste@exemplo.com"];
-    const exists = emailsExistentes.includes(email);
+    const exists = await emailExists(email);
 
     res.json({
       success: true,
