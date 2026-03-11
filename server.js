@@ -41,6 +41,13 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+if (process.env.NODE_ENV !== "production") {
+  const { default: swaggerUi } = await import("swagger-ui-express");
+  const { swaggerSpec } = await import("./src/config/swagger.js");
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  console.log(`📄 Docs: http://localhost:${PORT}/api-docs`);
+}
+
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/sales", salesRoutes);
