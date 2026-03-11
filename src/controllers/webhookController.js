@@ -16,7 +16,7 @@ export const mercadoPagoWebhook = async (req, res) => {
     const paymentStatus = await searchStatusPayment(paymentId);
     console.log("Status do pagamento:", paymentStatus);
 
-    if (paymentStatus.status !== "aprovado") {
+    if (paymentStatus.status !== "approved") {
       console.log("Pagamento ainda não aprovado, ignorando webhook");
       return res.status(200).json({
         success: true,
