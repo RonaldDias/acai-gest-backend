@@ -30,7 +30,7 @@ export const mercadoPagoWebhook = async (req, res) => {
       await client.query("BEGIN");
 
       const paymentResult = await client.query(
-        `SELECT p.id, p.empresa_id, p.status, p.tipo_assinatura, e.email, e.nome as empresa_nome
+        `SELECT p.id, p.empresa_id, p.status, p.tipo_assinatura, e.email, e.nome as empresa_nome, e.plano
         FROM pagamentos p
         INNER JOIN empresas e ON p.empresa_id = e.id
         WHERE p.payment_id = $1`,
