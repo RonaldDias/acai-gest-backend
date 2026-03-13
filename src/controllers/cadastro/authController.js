@@ -9,7 +9,7 @@ import {
   getPasswordResetTokenExpiry,
 } from "../../utils/auth.js";
 import { cpfExists, emailExists } from "../../utils/validators.js";
-import { logAudit } from '../../utils/auditLogger.js'
+import { logAudit } from "../../utils/auditLogger.js";
 import {
   sendWelcomeEmail,
   sendPasswordResetEmail,
@@ -159,8 +159,11 @@ export const cadastrarUsuario = async (req, res) => {
     }
 
     const valores = {
-      basico: { mensal: 149.9, anual: 1619.1 },
-      top: { mensal: 249.9, anual: 2699.1 },
+      basico: {
+        mensal: 149.9,
+        anual: parseFloat((149.9 * 12 * 0.9).toFixed(2)),
+      },
+      top: { mensal: 249.9, anual: parseFloat((249.9 * 12 * 0.9).toFixed(2)) },
     };
 
     const valor = valores[plano.toLowerCase()]?.[tipoAssinatura];
@@ -297,7 +300,14 @@ export const loginUsuario = async (req, res) => {
       [usuario.id, refreshToken, refreshTokenExpiry],
     );
 
-    await logAudit(usuario.id, 'login', 'usuarios', usuario.id, { email: usuario.email }, req)
+    await logAudit(
+      usuario.id,
+      "login",
+      "usuarios",
+      usuario.id,
+      { email: usuario.email },
+      req,
+    );
 
     res.json({
       success: true,
