@@ -80,6 +80,8 @@ export const mercadoPagoWebhook = async (req, res) => {
         [pagamento.empresa_id],
       );
 
+      console.log("userResult rows:", userResult.rows.length, userResult.rows);
+
       const dueDate =
         pagamento.tipo_assinatura === "anual"
           ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
