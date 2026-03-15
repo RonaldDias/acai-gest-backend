@@ -1,12 +1,14 @@
 import dotenv from "dotenv";
 import express from "express";
 import { testConnection } from "./src/config/database.js";
+import passport from "./src/config/passport.js";
 import { testMercadoPagoConnection } from "./src/config/mercadopago.js";
 import { startSubscriptionJob } from "./src/jobs/assinaturaJob.js";
 import { corsMiddleware } from "./src/middleware/cors.js";
 import { loggerMiddleware } from "./src/middleware/logger.js";
 import { globalLimiter } from "./src/middleware/rateLimiter.js";
 import authRoutes from "./src/routes/auth/auth.js";
+import socialRoutes from "./src/routes/auth/social.js";
 import empresasRoutes from "./src/routes/empresas.js";
 import pagamentosRoutes from "./src/routes/mercadoPago/pagamentos.js";
 import webhooksRoutes from "./src/routes/mercadoPago/webhooks.js";
@@ -31,6 +33,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(corsMiddleware);
 app.use(loggerMiddleware);
 app.use(globalLimiter);
+app.use(passport.initialize());
 
 app.get("/api/health", (req, res) => {
   res.json({
@@ -49,6 +52,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 app.use("/api/auth", authRoutes);
+app.use("/api/auth", socialRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/sales", salesRoutes);
 app.use("/api/vendedores", vendedoresRoutes);
