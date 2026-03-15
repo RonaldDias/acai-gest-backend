@@ -1,5 +1,5 @@
-import pool from "../config/database.js";
-import { logAudit } from "../utils/auditLogger.js";
+import pool from "../../config/database.js";
+import { logAudit } from "../../utils/auditLogger.js";
 
 export async function getAll(req, res) {
   try {
@@ -129,7 +129,14 @@ export async function entrada(req, res) {
 
     await client.query("COMMIT");
 
-    await logAudit(req.user.userId, 'entrada_estoque', 'produtos', produto_id, { quantidade, custo }, req)
+    await logAudit(
+      req.user.userId,
+      "entrada_estoque",
+      "produtos",
+      produto_id,
+      { quantidade, custo },
+      req,
+    );
 
     res.status(201).json({
       success: true,
@@ -251,7 +258,14 @@ export async function updateProduct(req, res) {
       [nome, preco, estoque_minimo, id],
     );
 
-    await logAudit(req.user.userId, 'editar', 'produtos', parseInt(id), { nome, preco, estoque_minimo }, req)
+    await logAudit(
+      req.user.userId,
+      "editar",
+      "produtos",
+      parseInt(id),
+      { nome, preco, estoque_minimo },
+      req,
+    );
 
     res.json({
       success: true,

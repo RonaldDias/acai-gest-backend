@@ -1,5 +1,5 @@
 import express from "express";
-import * as relatoriosController from "../../controllers/relatoriosController.js";
+import * as relatoriosController from "../../controllers/gestao/relatoriosController.js";
 import {
   authenticate,
   checkSubscription,

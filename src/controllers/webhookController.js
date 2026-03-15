@@ -100,12 +100,19 @@ export const mercadoPagoWebhook = async (req, res) => {
         ],
       );
 
+      const pin = Math.floor(100000 + Math.random() * 900000).toString();
+
+      await client.query(
+        `UPDATE usuarios SET pin = $1 WHERE empresa_id = $2 AND role = 'dono'`,
+        [pin, pagamento.empresa_id],
+      );
+
       await client.query("COMMIT");
 
       if (userResult.rows.length > 0) {
         const usuario = userResult.rows[0];
         try {
-          await sendWelcomeEmail(usuario.nome, usuario.email);
+          await sendWelcomeEmail(usuario.nome, usuario.email, pin);
         } catch (emailError) {
           console.error("Erro ao enviar email de boas-vindas:", emailError);
         }

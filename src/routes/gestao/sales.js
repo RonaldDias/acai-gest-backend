@@ -1,6 +1,6 @@
 import express from "express";
 import { validationResult } from "express-validator";
-import * as salesController from "../../controllers/salesController.js";
+import * as salesController from "../../controllers/gestao/salesController.js";
 import {
   authenticate,
   checkSubscription,

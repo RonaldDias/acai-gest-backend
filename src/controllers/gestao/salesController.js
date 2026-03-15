@@ -1,5 +1,5 @@
-import pool from "../config/database.js";
-import { logAudit } from "../utils/auditLogger.js";
+import pool from "../../config/database.js";
+import { logAudit } from "../../utils/auditLogger.js";
 
 export async function create(req, res) {
   const client = await pool.connect();

@@ -1,6 +1,6 @@
 import express from "express";
 import { validationResult } from "express-validator";
-import * as productsController from "../../controllers/productsController.js";
+import * as productsController from "../../controllers/gestao/productsController.js";
 import {
   authenticate,
   authorize,

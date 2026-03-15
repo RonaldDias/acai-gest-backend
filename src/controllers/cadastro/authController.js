@@ -243,7 +243,7 @@ export const loginUsuario = async (req, res) => {
     const isEmail = login.includes("@");
 
     const result = await pool.query(
-      `SELECT u.id, u.nome, u.senha, u.role, u.empresa_id, u.ponto_id, u.ativo, u.email,
+      `SELECT u.id, u.nome, u.senha, u.role, u.empresa_id, u.ponto_id, u.ativo, u.email, u.pin,
                 e.nome as empresa_nome, e.plano, e.ativo as empresa_ativa
         FROM usuarios u
         INNER JOIN empresas e ON u.empresa_id = e.id
@@ -319,6 +319,7 @@ export const loginUsuario = async (req, res) => {
         role: usuario.role,
         empresaId: usuario.empresa_id,
         pontoId: usuario.ponto_id,
+        pin: usuario.pin,
         empresa: {
           nome: usuario.empresa_nome,
           plano: usuario.plano,

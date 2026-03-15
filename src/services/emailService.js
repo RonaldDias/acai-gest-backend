@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendWelcomeEmail = async (nome, email) => {
+export const sendWelcomeEmail = async (nome, email, pin) => {
   const mailOptions = {
     from: `'Açaí Gest' <${process.env.EMAIL_USER}>`,
     to: email,
@@ -26,6 +26,12 @@ export const sendWelcomeEmail = async (nome, email) => {
           <li>Cadastre seus vendedores</li>
           <li>Comece a registrar suas vendas</li>
         </ol>
+
+        <div style="background-color: #f5f5f5; padding: 20px; border-radius: 5px; text-align: center; margin: 20px 0;">
+          <p style="margin: 0; font-size: 14px; color: #666;">Seu PIN de acesso é:</p>
+          <h1 style="margin: 10px 0; color: #8B4513; letter-spacing: 5px;">${pin}</h1>
+          <p style="margin: 0; font-size: 12px; color: #999;">Use este PIN para acessar relatórios e fluxo de caixa. Você pode alterá-lo no seu perfil.</p>
+        </div>
         
         <h3 style="color: #8B4513;">Recursos Disponíveis:</h3>
         <ul>
