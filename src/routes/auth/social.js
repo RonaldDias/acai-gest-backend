@@ -16,9 +16,15 @@ function handleOAuthCallback(req, res, provider) {
     }
 
     if (result.tipo === "cadastro") {
+      const payload = JSON.stringify({
+        success: true,
+        tipo: "cadastro",
+        email: result.email,
+        nome: result.nome,
+      });
       return res.send(`
             <script>
-                window.opener.postMessage({ success: true, tipo: 'cadastro', email: '${result.email}', nome: '${result.nome}' }, '*');
+                window.opener.postMessage(${payload}, '*');
                 window.close();
             </script>
         `);
