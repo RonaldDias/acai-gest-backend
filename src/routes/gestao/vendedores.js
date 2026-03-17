@@ -5,7 +5,7 @@ import {
   listVendedores,
   updateVendedor,
   deleteVendedor,
-} from "../../controllers/cadastro/vendedoresController.js";
+} from "../../controllers/gestao/vendedoresController.js";
 import {
   authenticate,
   checkSubscription,
