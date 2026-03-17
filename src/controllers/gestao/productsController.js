@@ -116,7 +116,7 @@ export async function entrada(req, res) {
 
     const produtoAtualizado = await client.query(
       `UPDATE produtos
-      SET quantidade_estoque = quantidade_estoque + $1,
+      SET quantidade_estoque = quantidade_estoque + $1
       WHERE id = $2
       RETURNING *`,
       [quantidade, produto_id],
