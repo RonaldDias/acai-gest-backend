@@ -208,7 +208,7 @@ export async function summaryToday(req, res) {
           COALESCE(SUM(valor_total), 0) as total_faturado
         FROM vendas
         WHERE ponto_id = $1
-          AND DATE(data_venda) = CURRENT_DATE`,
+          AND DATE(data_venda AT TIME ZONE 'UTC-3') = CURRENT_DATE AT TIME ZONE 'UTC-3'`,
       [pontoId],
     );
 
