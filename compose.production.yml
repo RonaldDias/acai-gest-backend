@@ -4,6 +4,8 @@ services:
     container_name: acai_gest_db
     env_file:
       - .env.production
+    environment:
+      - PGTZ: America/Belem
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
