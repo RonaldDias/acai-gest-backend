@@ -126,6 +126,19 @@ export async function entrada(req, res) {
       throw new Error("Produto não encontrado");
     }
 
+    if (custo) {
+      const pontoBusca = await client.query(
+        `SELECT ponto_id FROM produtos WHERE id = $1`,
+        [produto_id],
+      );
+
+      await client.query(
+        `INSERT INTO fluxo_caixa (ponto_id, tipo, categoria, valor, referencia_tabela, referencia_id)
+        VALUES ($1, 'despesa', 'Compra de Insumos', $2, 'movimentacoes_estoque', $3)`,
+      );
+      [pontoBusca.rows[0].ponto_id, custo, movimentacao.rows[0].id];
+    }
+
     await client.query("COMMIT");
 
     await logAudit(
@@ -210,6 +223,14 @@ export async function createProduct(req, res) {
         (produto_id, tipo, quantidade, custo, observacao)
         VALUES ($1, 'entrada', $2, $3, 'Estoque inicial')`,
         [produto.rows[0].id, quantidade_inicial, custo || null],
+      );
+    }
+
+    if (custo && quantidade_inicial > 0) {
+      await client.query(
+        `INSERT INTO fluxo_caixa (ponto_id, tipo, categoria, valor, referencia_tabela, referencia_id)
+        VALUES ($1, 'despesa', 'Compra de INsumos', $2, 'produtos', $3)`,
+        [ponto_id, custo, produto.rows[0].id],
       );
     }
 
