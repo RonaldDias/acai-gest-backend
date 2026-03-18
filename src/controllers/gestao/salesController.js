@@ -172,7 +172,7 @@ export async function today(req, res) {
        INNER JOIN itens_venda iv ON v.id = iv.venda_id
        INNER JOIN produtos p ON iv.produto_id = p.id
        WHERE v.ponto_id = $1
-         AND DATE(v.data_venda AT TIME ZONE 'UTC' AT TIME ZONE 'America/Belem') = CURRENT_DATE AT TIME ZONE 'America/Belem'
+         AND DATE(v.data_venda AT TIME ZONE 'UTC-3') = CURRENT_DATE AT TIME ZONE 'UTC-3'
        GROUP BY v.id, u.nome
        ORDER BY v.data_venda DESC`,
       [pontoId],
