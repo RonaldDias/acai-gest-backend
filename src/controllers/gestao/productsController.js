@@ -162,8 +162,16 @@ export async function createProduct(req, res) {
   const client = await pool.connect();
 
   try {
-    const { ponto_id, nome, tipo, unidade, preco, quantidade_inicial } =
-      req.body;
+    const {
+      ponto_id,
+      nome,
+      tipo,
+      unidade,
+      preco,
+      quantidade_inicial,
+      custo,
+      estoque_minimo,
+    } = req.body;
     const empresaId = req.user.empresaId;
 
     const pontoExists = await client.query(
@@ -185,15 +193,23 @@ export async function createProduct(req, res) {
       (ponto_id, nome, tipo, unidade, preco, quantidade_estoque, estoque_minimo)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *`,
-      [ponto_id, nome, tipo, unidade, preco, quantidade_inicial || 0, 0],
+      [
+        ponto_id,
+        nome,
+        tipo,
+        unidade,
+        preco,
+        quantidade_inicial || 0,
+        estoque_minimo || 0,
+      ],
     );
 
     if (quantidade_inicial > 0) {
       await client.query(
         `INSERT INTO movimentacoes_estoque
-        (produto_id, tipo, quantidade, observacao)
-        VALUES ($1, 'entrada', $2, 'Estoque inicial')`,
-        [produto.rows[0].id, quantidade_inicial],
+        (produto_id, tipo, quantidade, custo, observacao)
+        VALUES ($1, 'entrada', $2, $3, 'Estoque inicial')`,
+        [produto.rows[0].id, quantidade_inicial, custo || null],
       );
     }
 

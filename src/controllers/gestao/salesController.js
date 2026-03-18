@@ -103,6 +103,12 @@ export async function create(req, res) {
       );
     }
 
+    await client.query(
+      `INSERT INTO fluxo_caixa (ponto_id, tipo, categoria, valor, referencia_tabela, referencia_id)
+      VALUES ($1, 'receita', 'Venda', $2, 'vendas', $3)`,
+      [ponto_id, total, venda.id],
+    );
+
     await client.query("COMMIT");
 
     await logAudit(
