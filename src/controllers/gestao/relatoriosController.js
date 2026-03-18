@@ -133,7 +133,7 @@ export async function cashFlow(req, res) {
         data
       FROM fluxo_caixa
       WHERE ponto_id = $1
-        AND data BETWEEN $2 AND $3
+        AND data >= $2 AND data < ($3::date + INTERVAL '1 day'
       ORDER BY data DESC`,
       [pontoId, data_inicio, data_fim],
     );
@@ -144,7 +144,7 @@ export async function cashFlow(req, res) {
         COALESCE(SUM(CASE WHEN tipo = 'despesa' THEN valor ELSE 0 END), 0)::numeric AS expenses
       FROM fluxo_caixa
       WHERE ponto_id = $1
-        AND data BETWEEN $2 AND $3`,
+        AND data >= $2 AND data < ($3::date + INTERVAL '1 day'`,
       [pontoId, data_inicio, data_fim],
     );
 
