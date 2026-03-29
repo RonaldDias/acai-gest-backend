@@ -72,6 +72,19 @@ export async function vendas(req, res) {
       [pontoId, data_inicio, data_fim],
     );
 
+    const vendasPorHora = await pool.query(
+      `SELECT
+        EXTRACT(HOUR FROM data_venda) AS hora,
+        COUNT(*) AS total_vendas
+      FROM vendas
+      WHERE ponto_id = $1
+        AND status = 'ativa'
+        AND data_venda BETWEEN $2 AND $3
+      GROUP BY hora
+      ORDER BY hora`,
+      [pontoId, data_inicio, data_fim],
+    );
+
     res.json({
       success: true,
       data: result.rows,
@@ -79,6 +92,7 @@ export async function vendas(req, res) {
         total_vendas: parseInt(totais.rows[0].total_vendas),
         valor_total: parseFloat(totais.rows[0].valor_total),
       },
+      vendasPorHora: vendasPorHora.rows,
     });
   } catch (error) {
     console.error("Erro ao buscar relatório de vendas:", error);
