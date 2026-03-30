@@ -242,13 +242,15 @@ export const loginUsuario = async (req, res) => {
 
     const isEmail = login.includes("@");
 
+    const loginLimpo = isEmail ? login : login.replace(/\D/g, "");
+
     const result = await pool.query(
       `SELECT u.id, u.nome, u.senha, u.role, u.empresa_id, u.ponto_id, u.ativo, u.email, u.pin,
                 e.nome as empresa_nome, e.plano, e.ativo as empresa_ativa
         FROM usuarios u
         INNER JOIN empresas e ON u.empresa_id = e.id
         WHERE ${isEmail ? "u.email" : "u.cpf"} = $1`,
-      [login],
+      [loginLimpo],
     );
 
     if (result.rows.length === 0) {
