@@ -15,6 +15,7 @@ import productsRoutes from "./src/routes/gestao/products.js";
 import salesRoutes from "./src/routes/gestao/sales.js";
 import vendedoresRoutes from "./src/routes/gestao/vendedores.js";
 import despesasRoutes from "./src/routes/gestao/despesas.js";
+import usuariosRoutes from "./src/routes/gestao/usuarios.js";
 import pagamentosRoutes from "./src/routes/mercadoPago/pagamentos.js";
 import webhooksRoutes from "./src/routes/mercadoPago/webhooks.js";
 import auditLogsRoutes from "./src/routes/relatorios/auditLogs.js";
@@ -64,6 +65,7 @@ app.use("/api/empresas", empresasRoutes);
 app.use("/api/pagamentos", pagamentosRoutes);
 app.use("/api/webhooks", webhooksRoutes);
 app.use("/api/audit-logs", auditLogsRoutes);
+app.use("/api/usuarios", usuariosRoutes);
 
 app.use("*", (req, res) => {
   res.status(404).json({
