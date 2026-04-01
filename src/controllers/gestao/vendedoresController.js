@@ -198,3 +198,36 @@ export const deleteVendedor = async (req, res) => {
     });
   }
 };
+
+export const resetarSenha = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const empresaId = req.user.empresaId;
+
+    const check = await pool.query(
+      "SELECT id FROM usuarios WHERE id = $1 AND empresa_id = $2 AND role = 'vendedor'",
+      [id, empresaId],
+    );
+
+    if (check.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Vendedor não encontrado" });
+    }
+
+    const senhaTemporaria = generateVendedorPassword();
+    const senhaHash = await hashPassword(senhaTemporaria);
+
+    await pool.query("UPDATE usuarios SET senha = $1 WHERE id = $2", [
+      senhaHash,
+      id,
+    ]);
+
+    res.json({ success: true, senhaTemporaria });
+  } catch (error) {
+    console.error("Erro ao resetar senha:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Erro interno do servidor." });
+  }
+};

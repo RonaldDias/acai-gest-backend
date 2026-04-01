@@ -5,6 +5,7 @@ import {
   listVendedores,
   updateVendedor,
   deleteVendedor,
+  resetarSenha,
 } from "../../controllers/gestao/vendedoresController.js";
 import {
   authenticate,
@@ -62,6 +63,13 @@ router.delete(
   checkSubscription,
   authorize("dono"),
   deleteVendedor,
+);
+
+router.post(
+  "/:id/resetar-senha",
+  authenticate,
+  checkSubscription,
+  authorize("dono", resetarSenha),
 );
 
 export default router;
