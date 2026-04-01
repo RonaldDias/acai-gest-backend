@@ -83,7 +83,7 @@ export const listVendedores = async (req, res) => {
                  p.nome as ponto_nome
           FROM usuarios u
           INNER JOIN pontos p ON u.ponto_id = p.id
-          WHERE u.empresa_id = $1 AND u.role = 'vendedor'
+          WHERE u.empresa_id = $1 AND u.role = 'vendedor' AND u.ativo = true
     `;
     const params = [empresaId];
 
