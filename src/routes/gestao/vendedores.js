@@ -69,7 +69,8 @@ router.post(
   "/:id/resetar-senha",
   authenticate,
   checkSubscription,
-  authorize("dono", resetarSenha),
+  authorize("dono"),
+  resetarSenha,
 );
 
 export default router;
