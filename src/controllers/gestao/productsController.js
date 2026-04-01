@@ -135,8 +135,8 @@ export async function entrada(req, res) {
       await client.query(
         `INSERT INTO fluxo_caixa (ponto_id, tipo, categoria, valor, referencia_tabela, referencia_id)
         VALUES ($1, 'despesa', 'Compra de Insumos', $2, 'movimentacoes_estoque', $3)`,
+        [pontoBusca.rows[0].ponto_id, custo, movimentacao.rows[0].id],
       );
-      [pontoBusca.rows[0].ponto_id, custo, movimentacao.rows[0].id];
     }
 
     await client.query("COMMIT");
