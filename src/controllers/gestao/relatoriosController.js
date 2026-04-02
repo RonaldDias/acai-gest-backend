@@ -40,9 +40,9 @@ export async function vendas(req, res) {
     }
 
     const agrupamentos = {
-      dia: "DATE(data_venda)",
-      semana: "DATE_TRUNC('week', data_venda)",
-      mes: "DATE_TRUNC('month', data_venda)",
+      dia: "DATE(v.data_venda)",
+      semana: "DATE_TRUNC('week', v.data_venda)",
+      mes: "DATE_TRUNC('month', v.data_venda)",
     };
 
     const result = await pool.query(
