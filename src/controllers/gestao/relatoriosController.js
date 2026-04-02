@@ -68,7 +68,7 @@ export async function vendas(req, res) {
         FROM vendas
         WHERE ponto_id = $1
           AND status = 'ativa'
-        AND v.data_venda >= $2::date AND v.data_venda < ($3::date + INTERVAL '1 day')`,
+        AND data_venda >= $2::date AND data_venda < ($3::date + INTERVAL '1 day')`,
       [pontoId, data_inicio, data_fim],
     );
 
@@ -79,7 +79,7 @@ export async function vendas(req, res) {
       FROM vendas
       WHERE ponto_id = $1
         AND status = 'ativa'
-        AND v.data_venda >= $2::date AND v.data_venda < ($3::date + INTERVAL '1 day')
+        AND data_venda >= $2::date AND data_venda < ($3::date + INTERVAL '1 day')
       GROUP BY hora
       ORDER BY hora`,
       [pontoId, data_inicio, data_fim],
