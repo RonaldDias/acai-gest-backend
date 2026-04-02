@@ -50,9 +50,7 @@ export async function vendas(req, res) {
         ${agrupamentos[agrupar]} AS periodo,
         COUNT(*) AS total_vendas,
         COALESCE(SUM(valor_total), 0)::numeric AS valor_total,
-        SUM(iv.quantidade)::numeric AS total_quantidade
        FROM vendas v
-       INNER JOIN itens_venda iv ON v.id = iv.venda_id
        WHERE v.ponto_id = $1
         AND v.status = 'ativa'
         AND v.data_venda >= $2::date AND v.data_venda < ($3::date + INTERVAL '1 day')
