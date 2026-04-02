@@ -49,7 +49,7 @@ export async function vendas(req, res) {
       `SELECT
         ${agrupamentos[agrupar]} AS periodo,
         COUNT(*) AS total_vendas,
-        COALESCE(SUM(valor_total), 0)::numeric AS valor_total,
+        COALESCE(SUM(valor_total), 0)::numeric AS valor_total
        FROM vendas v
        WHERE v.ponto_id = $1
         AND v.status = 'ativa'
