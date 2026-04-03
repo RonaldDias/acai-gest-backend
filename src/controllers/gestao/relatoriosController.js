@@ -59,6 +59,20 @@ export async function vendas(req, res) {
       [pontoId, data_inicio, data_fim],
     );
 
+    const itensPorDia = await pool.query(
+      `SELECT
+        DATE(v.data_venda) AS periodo,
+        SUM(iv.quantidade)::numeric AS total_quantidade
+      FROM vendas v
+      INNER JOIN itens_venda iv ON v.id = iv.venda_id
+      WHERE v.ponto_id = $1
+        AND v.status = 'ativa'
+        AND v.data_venda >= $2::date AND v.data_venda < ($3::date + INTERVAL '1 day')
+      GROUP BY DATE(v.data_venda)
+      ORDER BY periodo DESC`,
+      [pontoId, data_inicio, data_fim],
+    );
+
     const totais = await pool.query(
       `SELECT
           COUNT(*) AS total_vendas,
@@ -86,6 +100,7 @@ export async function vendas(req, res) {
     res.json({
       success: true,
       data: result.rows,
+      itensPorDia: itensPorDia.rows,
       totais: {
         total_vendas: parseInt(totais.rows[0].total_vendas),
         valor_total: parseFloat(totais.rows[0].valor_total),
