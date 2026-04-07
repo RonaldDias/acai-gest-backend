@@ -32,7 +32,7 @@ export async function create(req, res) {
       await client.query(
         `INSERT INTO fluxo_caixa (ponto_id, tipo, categoria, valor, referencia_tabela, referencia_id, data)
         VALUES ($1, 'despesa', $2, $3, 'despesas', $4, $5)`,
-        [ponto_id, categoria, valor, despesa.rows[0].id, data || new Date()],
+        [ponto_id, descricao ? `${categoria} - ${descricao}` : categoria, valor, despesa.rows[0].id, data || new Date()],
       );
 
       await client.query("COMMIT");

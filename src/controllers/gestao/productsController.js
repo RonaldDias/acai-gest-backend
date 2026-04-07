@@ -229,7 +229,7 @@ export async function createProduct(req, res) {
     if (custo && quantidade_inicial > 0) {
       await client.query(
         `INSERT INTO fluxo_caixa (ponto_id, tipo, categoria, valor, referencia_tabela, referencia_id)
-        VALUES ($1, 'despesa', 'Compra de INsumos', $2, 'produtos', $3)`,
+        VALUES ($1, 'despesa', 'Compra de Insumos', $2, 'produtos', $3)`,
         [ponto_id, custo, produto.rows[0].id],
       );
     }
