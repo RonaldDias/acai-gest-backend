@@ -162,6 +162,7 @@ export async function today(req, res) {
           json_build_object(
             'produto_id', iv.produto_id,
             'produto_nome', p.nome,
+            'tipo', p.tipo,
             'quantidade', iv.quantidade,
             'preco_unitario', iv.preco_unitario,
             'subtotal', iv.subtotal
