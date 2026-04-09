@@ -11,6 +11,7 @@ import {
 } from "../../controllers/cadastro/authController.js";
 import { refreshAccessToken } from "../../controllers/refreshController.js";
 import { loginLimiter } from "../../middleware/rateLimiter.js";
+import { authenticate } from "passport";
 
 const router = express.Router();
 
@@ -103,7 +104,7 @@ router.post(
   resetPassword,
 );
 
-router.post("/validar-pin", validarPin);
+router.post("/validar-pin", authenticate, validarPin);
 
 router.get("/usuarios/:empresaId/status", getUsuarioStatus);
 
