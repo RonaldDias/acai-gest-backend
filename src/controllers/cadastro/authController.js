@@ -480,3 +480,24 @@ export const getUsuarioStatus = async (req, res) => {
     res.status(500).json({ success: false, ativo: false });
   }
 };
+
+export const validarPin = async (req, res) => {
+  try {
+    const { pin } = req.body;
+    const empresaId = req.user.empresaId;
+
+    const result = await pool.query(
+      "SELECT pin FROM usuarios WHERE empresa_id = $1 AND role = 'dono' AND ativo = true LIMIT 1",
+      [empresaId],
+    );
+
+    if (result.rows.length === 0 || result.rows[0].pin !== pin) {
+      return res.json({ success: false, message: "PIN incorreto" });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Erro ao validar PIN:", error);
+    res.status(500).json({ success: false, message: "Erro ao validar PIN" });
+  }
+}

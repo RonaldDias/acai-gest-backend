@@ -7,6 +7,7 @@ import {
   forgotPassword,
   resetPassword,
   getUsuarioStatus,
+  validarPin,
 } from "../../controllers/cadastro/authController.js";
 import { refreshAccessToken } from "../../controllers/refreshController.js";
 import { loginLimiter } from "../../middleware/rateLimiter.js";
@@ -101,6 +102,8 @@ router.post(
   ],
   resetPassword,
 );
+
+router.post("/validar-pin", validarPin);
 
 router.get("/usuarios/:empresaId/status", getUsuarioStatus);
 
