@@ -11,7 +11,7 @@ import {
 } from "../../controllers/cadastro/authController.js";
 import { refreshAccessToken } from "../../controllers/refreshController.js";
 import { loginLimiter } from "../../middleware/rateLimiter.js";
-import { authenticate } from "passport";
+import { authenticate } from "../../middleware/auth.js";
 
 const router = express.Router();
 
