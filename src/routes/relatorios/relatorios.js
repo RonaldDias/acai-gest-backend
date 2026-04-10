@@ -12,7 +12,7 @@ router.get(
   "/vendas",
   authenticate,
   checkSubscription,
-  authorize("dono"),
+  authorize("dono", "vendedor"),
   relatoriosController.vendas,
 );
 
@@ -20,7 +20,7 @@ router.get(
   "/fluxo-caixa",
   authenticate,
   checkSubscription,
-  authorize("dono"),
+  authorize("dono", "vendedor"),
   relatoriosController.cashFlow,
 );
 
