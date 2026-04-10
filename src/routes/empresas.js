@@ -24,4 +24,11 @@ router.patch(
   empresasController.updatePlan,
 );
 
+router.patch(
+  "/:id/cancelar-assinatura",
+  authenticate,
+  authorize("dono"),
+  empresasController.cancelarAssinatura,
+)
+
 export default router;

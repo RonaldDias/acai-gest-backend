@@ -125,3 +125,26 @@ export async function getAssinatura(req, res) {
     });
   }
 }
+
+export async function cancelarAssinatura(req, res) {
+  try {
+    const empresaId = req.user.empresaId;
+    const { id } = req.params;
+
+    if (parseInt(id) !== empresaId) {
+      return res.status(403).json({ success: false, message: "Sem permissão" });
+    }
+
+    await pool.query(
+      "UPDATE assinaturas SET status = 'cancelada' WHERE empresa_id = $1",
+      [empresaId],
+    );
+
+    await logAudit(req.user.userId, "cancelar_assinatura", "assinaturas", empresaId, {}, req);
+
+    res.json({ success: true, message: "Assinatura cancelada com sucesso" });
+  } catch (error) {
+    console.error("Erro ao cancelar assinatura:", error);
+    res.status(500).json({ success: false, message: "Erro ao cancelar assinatura" });
+  }
+}
