@@ -8,6 +8,14 @@ import {
 
 const router = express.Router();
 
+router.get(
+  "/:id/assinatura",
+  authenticate,
+  checkSubscription,
+  authorize("dono", "vendedor"),
+  empresasController.getAssinatura,
+)
+
 router.patch(
   "/:id/plano",
   authenticate,

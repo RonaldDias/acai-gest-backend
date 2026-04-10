@@ -96,3 +96,32 @@ export async function updatePlan(req, res) {
     client.release();
   }
 }
+
+export async function getAssinatura(req, res) {
+  try {
+    const empresaId = req.user.empresaId;
+    const result = await pool.query(
+      "SELECT plano, tipo, status, data_inicio, data_vencimento FROM assinaturas WHERE empresa_id = $1",
+      [empresaId],
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Assinatura não encontrada",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Erro ao buscar assinatura:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erro ao buscar assinatura",
+      error: error.message,
+    });
+  }
+}
