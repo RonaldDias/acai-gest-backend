@@ -21,7 +21,7 @@ router.patch(
   authenticate,
   checkSubscription,
   authorize("dono"),
-  empresasController.updatePlan,
+  empresasController.trocarPlano,
 );
 
 router.patch(
