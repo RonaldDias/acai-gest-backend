@@ -123,7 +123,7 @@ export async function trocarPlano(req, res) {
       }
     } else if (metodo_pagamento === "cartao") {
       const { createRecurringSubscription } = await import("../../services/pagamentoService.js");
-      const subscription = await createRecurringSubscription(empresa.email, card_token_id, valorCobrar, novo_plano);
+      const subscription = await createRecurringSubscription(empresa.email, valorCobrar, novo_plano);
 
       const result = await client.query(
         `INSERT INTO pagamentos (empresa_id, valor, status, metodo_pagamento, data_vencimento, payment_id, tipo_assinatura, plano)
@@ -134,7 +134,7 @@ export async function trocarPlano(req, res) {
       pagamentoResposta = {
         metodo: "cartao",
         valor: valorCobrar,
-        subscription_id: subscription.id,
+        init_point: subscription.init_point,
         pagamento_id: result.rows[0].id,
       }
     } else {
