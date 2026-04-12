@@ -1,5 +1,5 @@
 import pool from "../config/database.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { sendWelcomeEmail } from "../services/emailService.js";
 import { searchStatusPayment } from "../services/pagamentoService.js";
 
