@@ -1,10 +1,10 @@
-export const up = (pgm) => {
+exports.up = (pgm) => {
   pgm.alterColumn("usuarios", "pin", {
     type: "varchar(100)",
   });
 };
 
-export const down = (pgm) => {
+exports.down = (pgm) => {
   pgm.alterColumn("usuarios", "pin", {
     type: "varchar(6)",
   });
