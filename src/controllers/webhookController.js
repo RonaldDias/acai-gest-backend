@@ -1,4 +1,5 @@
 import pool from "../config/database.js";
+import bcrypt from "bcrypt";
 import { sendWelcomeEmail } from "../services/emailService.js";
 import { searchStatusPayment } from "../services/pagamentoService.js";
 
@@ -102,10 +103,11 @@ export const mercadoPagoWebhook = async (req, res) => {
       );
 
       const pin = Math.floor(100000 + Math.random() * 900000).toString();
+      const pinHash = await bcrypt.hash(pin, 12);
 
       await client.query(
         `UPDATE usuarios SET pin = $1 WHERE empresa_id = $2 AND role = 'dono'`,
-        [pin, pagamento.empresa_id],
+        [pinHash, pagamento.empresa_id],
       );
 
       await client.query("COMMIT");

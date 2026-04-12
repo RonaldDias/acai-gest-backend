@@ -1,4 +1,5 @@
 import pool from "../../config/database.js";
+import bcrypt from "bcrypt";
 import {
   hashPassword,
   comparePassword,
@@ -491,7 +492,8 @@ export const validarPin = async (req, res) => {
       [empresaId],
     );
 
-    if (result.rows.length === 0 || result.rows[0].pin !== pin) {
+    const pinValido = await bcrypt.compare(pin, result.rows[0].pin);
+    if (result.rows.length === 0 || !pinValido) {
       return res.json({ success: false, message: "PIN incorreto" });
     }
 

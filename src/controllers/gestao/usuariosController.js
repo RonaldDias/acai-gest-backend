@@ -1,4 +1,5 @@
 import pool from "../../config/database.js";
+import bcrypt from "bcrypt";
 
 export async function updatePin(req, res) {
   try {
@@ -9,8 +10,9 @@ export async function updatePin(req, res) {
       return res.status(400).json({ success: false, message: "PIN inválido." });
     }
 
+    const pinHash = await bcrypt.hash(pin, 12);
     await pool.query("UPDATE usuarios SET pin = $1 WHERE id = $2", [
-      pin,
+      pinHash,
       userId,
     ]);
 
