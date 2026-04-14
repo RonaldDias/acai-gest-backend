@@ -169,7 +169,7 @@ export async function getAssinatura(req, res) {
   try {
     const empresaId = req.user.empresaId;
     const result = await pool.query(
-      "SELECT plano, tipo, status, data_inicio, data_vencimento, plano pendente FROM assinaturas WHERE empresa_id = $1",
+      "SELECT plano, tipo, status, data_inicio, data_vencimento, plano_pendente FROM assinaturas WHERE empresa_id = $1",
       [empresaId],
     );
 
