@@ -171,6 +171,11 @@ export async function deletePonto(req, res) {
     await client.query("UPDATE pontos SET ativo = false WHERE id = $1", [id]);
 
     await client.query(
+      "UPDATE empresas SET quantidade_pontos = quantidade_pontos - 1 WHERE id = $1",
+      [empresaId],
+    );
+
+    await client.query(
       "UPDATE usuarios SET ativo = false WHERE ponto_id = $1",
       [id],
     );
