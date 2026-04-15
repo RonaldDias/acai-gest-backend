@@ -7,41 +7,45 @@ export const startSubscriptionJob = () => {
   cron.schedule("0 8 * * *", async () => {
     console.log("Job de vencimento de assinaturas iniciado");
 
-    const pendentes = await pool.query(
-      `SELECT a.empresa_id, a.plano_pendente, a.tipo
-      FROM assinaturas a
-      WHERE a.status = 'ativa'
-      AND a.plano_pendente IS NOT NULL
-      AND a.data_vencimento::date <= CURRENT_DATE`
-    );
+    try {
+      const pendentes = await pool.query(
+        `SELECT a.empresa_id, a.plano_pendente, a.tipo
+        FROM assinaturas a
+        WHERE a.status = 'ativa'
+        AND a.plano_pendente IS NOT NULL
+        AND a.data_vencimento::date <= CURRENT_DATE`
+      );
 
-    console.log(`Planos pendentes para processar: ${pendentes.rows.length}`);
+      console.log(`Planos pendentes para processar: ${pendentes.rows.length}`);
 
-    for (const row of pendentes.rows) {
-      try {
-        const novaVencimento = row.tipo === 'anual' ? 365 : 30;
+      for (const row of pendentes.rows) {
+        try {
+          const novaVencimento = row.tipo === 'anual' ? 365 : 30;
 
-        await pool.query(
-          `UPDATE assinaturas
-          SET plano = plano_pendente,
-              plano_pendente = NULL,
-              data_inicio = CURRENT_DATE,
-              data_vencimento = CURRENT_DATE + INTERVAL '${novaVencimento} days'
-          WHERE empresa_id = $1`,
-          [row.empresa_id]
-        );
+          await pool.query(
+            `UPDATE assinaturas
+            SET plano = plano_pendente,
+                plano_pendente = NULL,
+                data_inicio = CURRENT_DATE,
+                data_vencimento = CURRENT_DATE + INTERVAL '${novaVencimento} days'
+            WHERE empresa_id = $1`,
+            [row.empresa_id]
+          );
 
-        await pool.query(
-          `UPDATE empresas SET plano = $1 WHERE id = $2`,
-          [row.plano_pendente, row.empresa_id]
-        );
+          await pool.query(
+            `UPDATE empresas SET plano = $1 WHERE id = $2`,
+            [row.plano_pendente, row.empresa_id]
+          );
 
-        console.log(`Plano da empresa ${row.empresa_id} atualizado para ${row.plano_pendente}`);
-      } catch (error) {
-        console.error(`Erro ao processar plano da empresa ${row.empresa_id}:`, error);
+          console.log(`Plano da empresa ${row.empresa_id} atualizado para ${row.plano_pendente}`);
+        } catch (error) {
+          console.error(`Erro ao processar plano da empresa ${row.empresa_id}:`, error);
+        }
       }
+    } catch (error) {
+      console.error("Erro ao processar planos pendentes:", error);
     }
-
+    
     try {
       const result = await pool.query(
         `SELECT a.empresa_id, a.plano, a.tipo, a.data_vencimento, u.nome, u.email
