@@ -246,7 +246,7 @@ export const loginUsuario = async (req, res) => {
     const loginLimpo = isEmail ? login : login.replace(/\D/g, "");
 
     const result = await pool.query(
-      `SELECT u.id, u.nome, u.senha, u.role, u.empresa_id, u.ponto_id, u.ativo, u.email, u.pin,
+      `SELECT u.id, u.nome, u.senha, u.role, u.empresa_id, u.ponto_id, u.ativo, u.email,
                 e.nome as empresa_nome, e.plano, e.ativo as empresa_ativa
         FROM usuarios u
         INNER JOIN empresas e ON u.empresa_id = e.id
@@ -322,7 +322,6 @@ export const loginUsuario = async (req, res) => {
         role: usuario.role,
         empresaId: usuario.empresa_id,
         pontoId: usuario.ponto_id,
-        pin: usuario.pin,
         empresa: {
           nome: usuario.empresa_nome,
           plano: usuario.plano,
@@ -492,8 +491,12 @@ export const validarPin = async (req, res) => {
       [empresaId],
     );
 
+    if (result.rows.length === 0) {
+      return res.json({ success: false, message: "PIN incorreto" });
+    }
+
     const pinValido = await bcrypt.compare(pin, result.rows[0].pin);
-    if (result.rows.length === 0 || !pinValido) {
+    if (!pinValido) {
       return res.json({ success: false, message: "PIN incorreto" });
     }
 
