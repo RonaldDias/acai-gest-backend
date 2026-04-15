@@ -135,7 +135,7 @@ export const sendPasswordChangedEmail = async (nome, email) => {
   }
 };
 
-export const sendExpirationReminderEmail = async (nome, email, dueDate) => {
+export const sendExpirationReminderEmail = async (nome, email, dueDate, qrCode, qrCodeBase64) => {
   const data = new Date(dueDate).toLocaleDateString("pt-BR");
 
   const mailOptions = {
@@ -149,6 +149,12 @@ export const sendExpirationReminderEmail = async (nome, email, dueDate) => {
         
         <div style="background-color: #fff3e0; padding: 20px; border-radius: 5px; margin: 20px 0;">
           <p style="margin: 0; color: #e65100;">⚠️ Renove sua assinatura para não perder o acesso ao sistema.</p>
+        </div>
+
+        <div style="text-align: center; margin: 20px 0;">
+          <p style="font-size: 14px; color: #333; margin-bottom: 10px;">Escaneie o QR Code abaixo para renovar:</p>
+          <img src="data:image/png;base64,${qrCodeBase64}" width="200" height="200" alt="QR Code PIX" style="border: 1px solid #ddd; border-radius: 5px;" />
+          <p style="font-size: 11px; color: #666; margin-top: 10px; word-break: break-all; max-width: 400px; margin-left: auto; margin-right: auto;">${qrCode}</p>
         </div>
         
         <p>Se já realizou o pagamento, desconsidere este aviso.</p>
