@@ -246,7 +246,7 @@ export const loginUsuario = async (req, res) => {
     const loginLimpo = isEmail ? login : login.replace(/\D/g, "");
 
     const result = await pool.query(
-      `SELECT u.id, u.nome, u.senha, u.role, u.empresa_id, u.ponto_id, u.ativo, u.email,
+      `SELECT u.id, u.nome, u.senha, u.role, u.empresa_id, u.ponto_id, u.ativo, u.email, u.tentativas_falhas, u.bloqueado_ate,
                 e.nome as empresa_nome, e.plano, e.ativo as empresa_ativa
         FROM usuarios u
         INNER JOIN empresas e ON u.empresa_id = e.id
@@ -277,13 +277,34 @@ export const loginUsuario = async (req, res) => {
       });
     }
 
+    if (usuario.bloqueado_ate && new Date(usuario.bloqueado_ate) > new Date()) {
+      return res.status(403).json({
+        success: false,
+        message: "Por razões de segurança sua conta está temporariamente bloqueada devido a múltiplas falhas de login. Tente novamente em 15 minutos.",
+      });
+    }
+
     const senhaValida = await comparePassword(senha, usuario.senha, usuario.id);
 
     if (!senhaValida) {
+      const novasTentativas = (usuario.tentativas_falhas || 0) + 1;
+      let queryUpdate = "UPDATE usuarios SET tentativas_falhas = $1 WHERE id = $2";
+      let paramsUpdate = [novasTentativas, usuario.id];
+
+      if (novasTentativas >= 5) {
+        queryUpdate = "UPDATE usuarios SET tentativas_falhas = $1, bloqueado_ate = NOW() + INTERVAL '15 minutes' WHERE id = $2";
+      }
+
+      await pool.query(queryUpdate, paramsUpdate);
+
       return res.status(401).json({
         success: false,
         message: "Credenciais incorretas",
       });
+    }
+
+    if ((usuario.tentativas_falhas || 0) > 0 || usuario.bloqueado_ate) {
+      await pool.query("UPDATE usuarios SET tentativas_falhas = 0, bloqueado_ate = NULL WHERE id = $1", [usuario.id]);
     }
 
     const token = generateToken({
