@@ -9,28 +9,31 @@ export const hashPassword = async (senha) => {
 };
 
 export const comparePassword = async (senhaDigitada, hashSalvaNoBanco, userId = null) => {
-  try {
-    if (await argon2.verify(hashSalvaNoBanco, senhaDigitada)) {
-      return true;
-    }
-  } catch (err) {
+  if (!hashSalvaNoBanco || !senhaDigitada) return false;
+
+  const isBcrypt = hashSalvaNoBanco.startsWith("$2");
+
+  if (isBcrypt) {
     const validBcrypt = await bcrypt.compare(senhaDigitada, hashSalvaNoBanco);
-
-    if (validBcrypt) {
-      if (userId) {
+    
+    if (validBcrypt && userId) {
+      try {
         const novaHashArgon = await hashPassword(senhaDigitada);
-
-        pool.query(
-          "UPDATE usuarios SET senha = $1 WHERE id = $2",
-          [novaHashArgon, userId]).catch(console.error);
+        await pool.query("UPDATE usuarios SET senha = $1 WHERE id = $2", [novaHashArgon, userId]);
+      } catch (e) {
+        console.error("Erro na conversão transparente Argon2:", e);
       }
-
-      return true;
     }
+    return validBcrypt;
   }
 
-  return false;
+  try {
+    return await argon2.verify(hashSalvaNoBanco, senhaDigitada);
+  } catch (err) {
+    return false;
+  }
 };
+
 
 export const generateToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_SECRET, {
