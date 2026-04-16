@@ -277,12 +277,12 @@ export const loginUsuario = async (req, res) => {
       });
     }
 
-    const senhaValida = await comparePassword(senha, usuario.senha);
+    const senhaValida = await comparePassword(senha, usuario.senha, usuario.id);
 
     if (!senhaValida) {
       return res.status(401).json({
         success: false,
-        message: "Email ou senha incorretos",
+        message: "Credenciais incorretas",
       });
     }
 

@@ -27,13 +27,27 @@ export async function create(req, res) {
       });
     }
 
+    const empresaId = req.user.empresaId;
+      const pontoExists = await pool.query(
+        "SELECT id FROM pontos WHERE id = $1 AND empresa_id = $2",
+        [ponto_id, empresaId]
+      );
+
+      if (pontoExists.rowCount === 0) {
+        return res.status(403).json({
+          success: false,
+          message: "Acesso negado",
+        });
+      }
+
+
     await client.query("BEGIN");
 
     for (const item of itens) {
       const estoqueCheck = await client.query(
         `SELECT nome, quantidade_estoque
         FROM produtos
-        WHERE id = $1 AND ponto_id = $2`,
+        WHERE id = $1 AND ponto_id = $2 FOR UPDATE`,
         [item.produto_id, ponto_id],
       );
 
@@ -151,6 +165,19 @@ export async function today(req, res) {
       });
     }
 
+    const empresaId = req.user.empresaId;
+      const pontoExists = await pool.query(
+        "SELECT id FROM pontos WHERE id = $1 AND empresa_id = $2",
+        [pontoId, empresaId]
+      );
+
+      if (pontoExists.rowCount === 0) {
+        return res.status(403).json({
+          success: false,
+          message: "Acesso negado ao ponto informado",
+        });
+      }
+
     const result = await pool.query(
       `SELECT
         v.id,
@@ -202,6 +229,19 @@ export async function summaryToday(req, res) {
         message: "ponto_id é obrigatório",
       });
     }
+
+    const empresaId = req.user.empresaId;
+      const pontoExists = await pool.query(
+        "SELECT id FROM pontos WHERE id = $1 AND empresa_id = $2",
+        [pontoId, empresaId]
+      );
+
+      if (pontoExists.rowCount === 0) {
+        return res.status(403).json({
+          success: false,
+          message: "Acesso negado ao ponto informado",
+        });
+      }
 
     const result = await pool.query(
       `SELECT

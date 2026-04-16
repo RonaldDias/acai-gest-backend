@@ -1,14 +1,35 @@
-import bcrypt, { hash } from "bcryptjs";
+import bcrypt from "bcryptjs";
+import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import pool from "../config/database.js";
 
 export const hashPassword = async (senha) => {
-  const saltRounds = 12;
-  return await bcrypt.hash(senha, saltRounds);
+  return await argon2.hash(senha, { type: argon2.argon2id });
 };
 
-export const comparePassword = async (senha, hash) => {
-  return await bcrypt.compare(senha, hash);
+export const comparePassword = async (senhaDigitada, hashSalvaNoBanco, userId = null) => {
+  try {
+    if (await argon2.verify(hashSalvaNoBanco, senhaDigitada)) {
+      return true;
+    }
+  } catch (err) {
+    const validBcrypt = await bcrypt.compare(senhaDigitada, hashSalvaNoBanco);
+
+    if (validBcrypt) {
+      if (userId) {
+        const novaHashArgon = await hashPassword(senhaDigitada);
+
+        pool.query(
+          "UPDATE usuarios SET senha = $1 WHERE id = $2",
+          [novaHashArgon, userId]).catch(console.error);
+      }
+
+      return true;
+    }
+  }
+
+  return false;
 };
 
 export const generateToken = (payload) => {
