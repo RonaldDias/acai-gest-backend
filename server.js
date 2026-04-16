@@ -1,5 +1,7 @@
 import dotenv from "dotenv";
 import express from "express";
+import helmet from "helmet";
+import hpp from "hpp";
 import { testConnection } from "./src/config/database.js";
 import { testMercadoPagoConnection } from "./src/config/mercadopago.js";
 import passport from "./src/config/passport.js";
@@ -31,8 +33,10 @@ testConnection();
 testMercadoPagoConnection();
 startSubscriptionJob();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50kb" }));
+app.use(express.urlencoded({ extended: true, limit: "50kb" }));
+app.use(helmet());
+app.use(hpp());
 app.use(corsMiddleware);
 app.use(loggerMiddleware);
 app.use(globalLimiter);
