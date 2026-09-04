@@ -3,7 +3,8 @@ export function corsMiddleware(req, res, next) {
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://acaigest.com.br",
-  ];
+    process.env.FRONTEND_URL,
+  ].filter(Boolean);
   const origin = req.headers.origin;
 
   if (allowedOrigins.includes(origin)) {
